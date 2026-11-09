@@ -2,7 +2,7 @@
 <html lang="zh-Hant"><head><meta charset="utf-8"><title>蜂宅 CRM・報價</title><meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{--y:#ffd200;--g:#7a868d;--d:#222;--g:#888;--r:#d9363e;--bg:#faf8f3}
+:root{--y:#f6c445;--g:#888;--d:#222;--r:#d9363e;--bg:#f3f0e8}
 *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;background:var(--bg);color:var(--d);font-size:15px}
 header{background:var(--d);color:#fff;display:flex;align-items:center;gap:6px;padding:10px 12px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
 header b{color:var(--y);margin-right:auto;font-size:17px}
@@ -48,14 +48,108 @@ table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #eee;pad
 .brand{display:flex;align-items:center;gap:8px}#hdLogo{height:30px;background:#fff;border-radius:6px;padding:2px 6px}
 .plogo{height:46px;display:block;margin:0 0 6px auto}
 
+@media screen{
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans CJK TC",sans-serif;font-size:16px;line-height:1.55;color:#1a1a1a;background:var(--bg)}
+header{background:#1a1a1a;color:#fff;display:flex;align-items:center;gap:12px;padding:10px 16px;position:sticky;top:0;z-index:5;flex-wrap:wrap;box-shadow:0 2px 10px #0003}
+header .brand{color:#fff;margin-right:0;font-size:16px;font-weight:700;letter-spacing:.02em;gap:10px}
+header .brand span{color:var(--y)}
+#hdLogo{height:32px;background:#fff;border-radius:8px;padding:3px 7px}
+.nav{display:flex;gap:4px;background:#2a2a2a;padding:4px;border-radius:12px}
+header button[data-v]{background:transparent;border:0;color:#e8e8e8;border-radius:9px;padding:8px 16px;font:inherit;font-weight:700;min-height:40px;min-width:72px;cursor:pointer}
+header button[data-v].on{background:var(--y);color:#1a1a1a}
+header .hd-add{margin-left:auto}
+main{padding:18px 16px 32px;max-width:1100px;margin:auto}
+.card{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 2px #0001,0 8px 24px #1a1a1a08;border:1px solid #efe9dc}
+.card-hd{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin:-2px 0 14px;padding:0 0 12px;border-bottom:1px solid #efe9dc}
+.card-hd h3,.card-hd b{margin:0;margin-right:auto;font-size:18px;font-weight:700;letter-spacing:.01em;line-height:1.3}
+.card-hd .sub,.card-hd h3 .sub{color:#6b6256;font-size:13px;font-weight:600;margin-left:6px;letter-spacing:0}
+.card-hd .acts,.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.gap{margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1.5px solid #d8d1c3;background:#fff;border-radius:999px;padding:8px 14px;margin:0;font:inherit;font-weight:600;min-height:40px;cursor:pointer;color:#333}
+.chips button.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.case{display:flex;justify-content:space-between;gap:12px;cursor:pointer;border-left:5px solid var(--y);padding:16px 18px;transition:box-shadow .15s,transform .15s}
+.case:hover{box-shadow:0 6px 22px #1a1a1a14;transform:translateY(-1px)}
+.case b{font-size:17px}
+.case.unpaid{border-left-color:var(--r)}
+.tag{font-size:12px;padding:3px 9px;border-radius:999px;background:#eeeae2;font-weight:600;display:inline-block;margin:2px 0}
+.tag.red{background:var(--r);color:#fff}
+.muted{color:#5c6570;font-size:13px}
+.amt{font-weight:700;font-variant-numeric:tabular-nums;font-size:16px;color:#1a1a1a}
+.who{color:#3d4450;margin:0 0 14px;line-height:1.6}
+button{font:inherit;cursor:pointer}
+button.p,button.s{border-radius:9px;padding:9px 16px;min-height:40px;font-weight:700;letter-spacing:.02em}
+button.p{background:var(--y);border:0;color:#1a1a1a;box-shadow:0 1px 0 #0001}
+button.p:hover{filter:brightness(.97)}
+button.s{background:#fff;border:1.5px solid #c9c2b4;color:#2a2a2a}
+button.s:hover{border-color:#8a8376;background:#faf7f0}
+input,select,textarea{font:inherit;padding:9px 10px;border:1.5px solid #d5cfc3;border-radius:8px;width:100%;background:#fff;min-height:40px}
+input:focus,select:focus,textarea:focus{outline:2px solid #f6c44588;border-color:#e0b03a}
+label{font-size:12px;color:#6b6256;display:block;font-weight:600;letter-spacing:.04em;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 16px}
+.kv .val{font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.45;word-break:break-word;min-height:1.45em}
+.stage-wrap{margin-top:16px}
+.stepper{display:flex;flex-wrap:wrap;margin-top:6px}
+.stepper button{font:inherit;font-weight:700;border:1.5px solid #d4cfc4;background:#fff;color:#444;padding:8px 14px;min-height:42px;margin:0 -1px 0 0;border-radius:0;cursor:pointer}
+.stepper button:first-child{border-radius:9px 0 0 9px}
+.stepper button:last-child{border-radius:0 9px 9px 0}
+.stepper button.on{background:var(--y);border-color:#e0b03a;color:#1a1a1a;position:relative;z-index:1;box-shadow:inset 0 -3px 0 #c9a017}
+.alert{border-left:5px solid var(--r)}
+.search{max-width:220px;min-width:140px}
+table{border-collapse:collapse;width:100%}
+.card table{font-size:15px}
+.card th,.card td{border-bottom:1px solid #efe9dc;padding:10px 8px;text-align:left;word-break:keep-all}
+.card td button.p,.card td button.s{min-height:34px;padding:5px 10px;font-size:14px}
+.card tr:first-child th{background:#f6f1e6;font-size:13px;color:#5c5346;font-weight:700;white-space:nowrap;position:sticky;top:0;z-index:1}
+.card table > tr:nth-child(even) td,.card tbody tr:nth-child(even) td{background:#faf8f3}
+.card table > tr:hover td,.card tbody tr:hover td{background:#fff6d4}
+.card table > tr:first-child:hover th,.card thead tr:hover th{background:#f6f1e6}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ed td{padding:6px 4px}
+.ed td input,.ed td select{padding:8px 6px;min-height:38px}
+.sum{position:sticky;bottom:8px;background:#1a1a1a;color:#fff;border-radius:12px;padding:14px 18px;display:flex;gap:20px;flex-wrap:wrap;box-shadow:0 8px 24px #0004;z-index:4}
+.sum b{color:var(--y);font-size:18px}
+.bad{color:#ff8a8a!important}
+.card tr.web td{background:#fff3cd!important}.card tr.web:hover td{background:#ffe9a8!important}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:999px;display:none;z-index:9;box-shadow:0 6px 20px #0004}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:800px;margin:0 auto 12px;background:#fff;border:1px solid #efe9dc;border-radius:12px;padding:10px 12px;box-shadow:0 1px 2px #0001}
+.toolbar.wide{max-width:1100px}
+.crfed .opts{gap:8px}
+.crfed .opts label{padding:6px 12px;min-height:36px;border-radius:999px}
+.crfed h4{margin:16px 0 8px;background:var(--y);padding:8px 12px;border-radius:8px;font-size:15px}
+#ft{padding:8px 0 28px}
+@media(max-width:700px){
+  header{padding:10px 12px;gap:8px}
+  header .nav{order:3;width:100%}
+  header .nav button{flex:1}
+  header .hd-add{margin-left:auto}
+  main{padding:12px 10px 28px}
+  .card{padding:14px}
+  .stepper button{border-radius:9px;margin:0 6px 6px 0}
+  .stepper button:first-child,.stepper button:last-child{border-radius:9px}
+  .card-hd button,.acts button,.chips button,.stepper button,.toolbar button,header .hd-add{min-height:44px}
+  .card td button.p,.card td button.s{min-height:34px;padding:5px 8px}
+  .case{padding:14px}
+  .search{max-width:none;flex:1}
+}
+}
+
 #login{display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px}
-#login form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:6px}#login h3{margin:4px 0 8px}#lgLogo{height:46px;align-self:flex-start}
-#login label{font-size:13px;color:var(--g)}#login input{width:100%;padding:9px;border:1px solid #ccc;border-radius:6px;font-size:16px}
-#login button{margin-top:8px}#lgErr{color:var(--r);min-height:1.2em;font-size:14px}#lgUrlRow{display:flex;flex-direction:column;gap:6px}
-#ft{text-align:center;padding:10px 0 24px}#ft .out{background:none;border:0;color:var(--g);text-decoration:underline;font-size:13px}
+#login form{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px;padding:28px 24px;border-radius:16px;border-top:4px solid var(--y);box-shadow:0 12px 40px #1a1a1a14}
+#login h3{margin:6px 0 12px;font-size:22px}
+#lgLogo{height:48px;align-self:flex-start}
+#login label{font-size:13px;color:#6b6256;font-weight:600}
+#login input{width:100%;padding:11px 12px;border:1.5px solid #d5cfc3;border-radius:8px;font-size:16px;min-height:44px}
+#login button{margin-top:10px;width:100%;min-height:46px;font-size:16px}
+#lgErr{color:var(--r);min-height:1.2em;font-size:14px}
+#lgUrlRow{display:flex;flex-direction:column;gap:6px}
+#ft{text-align:center;padding:10px 0 24px}#ft .out{background:none;border:0;color:#5c6570;text-decoration:underline;font-size:13px;cursor:pointer;min-height:auto;padding:6px}
 </style></head><body>
-<header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> CRM・報價</b>
-<button data-v="list">案件</button><button data-v="prices">單價庫</button><button onclick="newCustomer()">＋客戶</button></header>
+<header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> <span>CRM・報價</span></b>
+<nav class="nav"><button type="button" data-v="list">案件</button><button type="button" data-v="prices">單價庫</button></nav>
+<button type="button" class="p hd-add" onclick="newCustomer()">＋客戶</button></header>
 <main id="app"></main><footer id="ft" class="noprint"><button class="out" onclick="logout()">登出這台裝置</button></footer><div id="login"><form id="lgForm" class="card"><img id="lgLogo" alt="蜂宅 BEE HOME"><h3>蜂宅 CRM・報價</h3>
 <div id="lgUrlRow"><label>Apps Script 網址（只要貼一次）</label><input id="lgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
 <label>密碼</label><input id="lgPw" type="password" autocomplete="current-password">
@@ -291,7 +385,7 @@ function kase(id){return D.cases.filter(function(c){return c['案件ID']===id})[
 function pays(id){return D.payments.filter(function(p){return p['案件ID']===id})}
 function unpaid(id){return pays(id).some(function(p){return bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today})}
 function render(){
-  document.querySelectorAll('header button[data-v]').forEach(function(b){b.className=b.dataset.v===S.view?'on':''});
+  document.querySelectorAll('header button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===S.view)});
   ({list:vList,case:vCase,editor:vEditor,prices:vPrices,print:vPrint,sched:vSched,schedPrint:vSchedPrint,contract:vContract,ctEdit:vCtEdit,crf:vCrf,crfPrint:vCrfPrint})[S.view]();
   window.scrollTo(0,0);
 }
@@ -301,20 +395,20 @@ function vList(){
   var cs=D.cases.filter(function(k){return S.stage==='全部'||(S.stage==='待收款'?unpaid(k['案件ID']):k['階段']===S.stage)})
     .sort(function(a,b){return unpaid(b['案件ID'])-unpaid(a['案件ID'])||String(b['建立日期']).localeCompare(a['建立日期'])});
   var pend=(D.crfs||[]).filter(function(r){return r['狀態']==='待處理'});
-  var h=pend.length?'<div class="card" id="pending" style="border-left:5px solid var(--r)"><b>📝 新的線上需求表（'+pend.length+'）</b>'+pend.map(function(r){return '<div class="row" style="margin-top:6px"><span style="margin-right:auto">'+esc(r['姓名'])+' <span class="muted">'+esc(r['電話'])+' ・ '+esc(r['建立時間'])+'</span></span><button class="s" onclick="openCrfId(\''+r['需求表ID']+'\',1)">查看</button><button class="p" onclick="convCrf(\''+r['需求表ID']+'\')">轉成客戶＋案件</button><button class="s" onclick="if(confirm(\'忽略這份需求表？\'))api(\'dismissCRF\',\''+r['需求表ID']+'\').then(load)">忽略</button></div>'}).join('')+'</div>':'';
+  var h=pend.length?'<div class="card alert" id="pending"><div class="card-hd"><h3>📝 新的線上需求表（'+pend.length+'）</h3></div>'+pend.map(function(r){return '<div class="row gap"><span style="margin-right:auto">'+esc(r['姓名'])+' <span class="muted">'+esc(r['電話'])+' ・ '+esc(r['建立時間'])+'</span></span><button class="s" onclick="openCrfId(\''+r['需求表ID']+'\',1)">查看</button><button class="p" onclick="convCrf(\''+r['需求表ID']+'\')">轉成客戶＋案件</button><button class="s" onclick="if(confirm(\'忽略這份需求表？\'))api(\'dismissCRF\',\''+r['需求表ID']+'\').then(load)">忽略</button></div>'}).join('')+'</div>':'';
   h+='<div class="card chips">'+st.map(function(s){var n=s==='全部'?D.cases.length:s==='待收款'?D.cases.filter(function(k){return unpaid(k['案件ID'])}).length:D.cases.filter(function(k){return k['階段']===s}).length;
     return '<button class="'+(S.stage===s?'on':'')+'" onclick="S.stage=\''+s+'\';render()">'+s+' '+n+'</button>'}).join('')+'</div>';
   h+=cs.map(function(k){var c=cust(k['客戶ID']),u=unpaid(k['案件ID']);
     return '<div class="card case'+(u?' unpaid':'')+'" onclick="S.caseId=\''+k['案件ID']+'\';S.view=\'case\';render()"><div><b>'+esc(c['姓名'])+'</b> <span class="muted">'+k['案件ID']+'</span><br><span class="muted">'+esc(siteAddr(k,c))+' ・ '+esc(k['坪數'])+'坪 ・ '+esc(k['負責人'])+'</span></div>'+
-    '<div style="text-align:right"><span class="tag">'+esc(k['階段'])+'</span>'+(u?'<br><span class="tag red">待收款</span>':'')+(k['合約總價']?'<br><span class="muted">$'+money(k['合約總價'])+'</span>':'')+'</div></div>'}).join('')||'<div class="card muted">沒有案件。按右上「＋客戶」開始。</div>';
-  h+='<div class="card"><b>客戶</b><div class="scroll"><table><tr><th>ID</th><th>姓名</th><th>電話</th><th class="hide-m">LINE</th><th class="hide-m">地址</th><th class="hide-m">來源</th><th></th></tr>'+
+    '<div style="text-align:right"><span class="tag">'+esc(k['階段'])+'</span>'+(u?'<br><span class="tag red">待收款</span>':'')+(k['合約總價']?'<br><span class="amt">$'+money(k['合約總價'])+'</span>':'')+'</div></div>'}).join('')||'<div class="card muted">沒有案件。按右上「＋客戶」開始。</div>';
+  h+='<div class="card"><div class="card-hd"><h3>客戶</h3></div><div class="scroll"><table><tr><th>ID</th><th>姓名</th><th>電話</th><th class="hide-m">LINE</th><th class="hide-m">地址</th><th class="hide-m">來源</th><th></th></tr>'+
     D.customers.map(function(c){return '<tr><td>'+c['客戶ID']+'</td><td>'+esc(c['姓名'])+'</td><td>'+esc(c['電話'])+'</td><td class="hide-m">'+esc(c['LINE'])+'</td><td class="hide-m">'+esc(c['地址'])+'</td><td class="hide-m">'+esc(c['來源'])+'</td><td><button class="s" onclick="editCustomer(\''+c['客戶ID']+'\')">編輯</button> <button class="s" onclick="newCase(\''+c['客戶ID']+'\')">＋案件</button></td></tr>'}).join('')+'</table></div></div>';
   $('#app').innerHTML=h;
 }
 function form(title,fields,obj,onsave){
-  $('#app').innerHTML='<div class="card"><h3>'+title+'</h3><div class="grid">'+fields.map(function(f){var k=f[0],v=obj[k]==null?'':obj[k];
+  $('#app').innerHTML='<div class="card"><div class="card-hd"><h3>'+title+'</h3></div><div class="grid">'+fields.map(function(f){var k=f[0],v=obj[k]==null?'':obj[k];
     var inp=f[1]?'<select data-k="'+k+'">'+f[1].map(function(o){return '<option'+(o==v?' selected':'')+'>'+o+'</option>'}).join('')+'</select>':'<input data-k="'+k+'" value="'+esc(v)+'">';
-    return '<div><label>'+k+'</label>'+inp+'</div>'}).join('')+'</div><br><div class="row"><button class="p" id="sv">儲存</button><button class="s" onclick="render()">取消</button></div></div>';
+    return '<div class="kv"><label>'+k+'</label>'+inp+'</div>'}).join('')+'</div><div class="row acts"><button class="p" id="sv">儲存</button><button class="s" onclick="render()">取消</button></div></div>';
   $('#sv').onclick=function(){document.querySelectorAll('[data-k]').forEach(function(e){obj[e.dataset.k]=e.value});onsave(obj)};
 }
 // 施工地址：案件有填用案件的，否則用客戶地址
@@ -328,18 +422,18 @@ function newCase(cid){S.view='list';form('新增案件（'+esc(cust(cid)['姓名
 function vCase(){
   var k=kase(S.caseId),c=cust(k['客戶ID']);
   var qs=D.quotes.filter(function(q){return q['案件ID']===k['案件ID']}).sort(function(a,b){return b['版本']-a['版本']});
-  var h='<div class="card"><div class="row"><h3 style="margin:0;margin-right:auto">'+esc(c['姓名'])+' <span class="muted">'+k['案件ID']+'</span></h3><button class="s" onclick="editCase()">編輯案件</button></div>'+
-    '<p class="muted">📞 '+esc(c['電話'])+' ・ LINE '+esc(c['LINE'])+' ・ '+esc(c['Email'])+(c['地址']?' ・ 🏠 '+esc(c['地址']):'')+'</p><div class="grid">'+
-    [['案名'],['地址'],['坪數'],['屋況'],['風格'],['負責人']].map(function(f){return '<div><label>'+(f[0]==='地址'?'施工地址':f[0])+'</label>'+esc(f[0]==='地址'?siteAddr(k,c):k[f[0]])+'</div>'}).join('')+
-    '<div><label>合約總價</label>$'+money(k['合約總價'])+'</div></div><br><label>階段</label><div class="chips">'+BH.STAGES.map(function(s){return '<button class="'+(k['階段']===s?'on':'')+'" onclick="setStage(\''+s+'\')">'+s+'</button>'}).join('')+'</div></div>';
-  h+='<div class="card"><div class="row"><b style="margin-right:auto">報價版本</b><button class="p" onclick="openEditor()">＋新報價</button></div><div class="scroll"><table><tr><th>版本</th><th>日期</th><th class="num">總價</th><th class="num">毛利率</th><th>狀態</th><th class="hide-m">變更說明</th><th></th></tr>'+
+  var h='<div class="card"><div class="card-hd"><h3>'+esc(c['姓名'])+' <span class="muted">'+k['案件ID']+'</span></h3><div class="acts"><button class="s" onclick="editCase()">編輯案件</button></div></div>'+
+    '<p class="who">📞 '+esc(c['電話'])+' ・ LINE '+esc(c['LINE'])+' ・ '+esc(c['Email'])+(c['地址']?' ・ 🏠 '+esc(c['地址']):'')+'</p><div class="grid">'+
+    [['案名'],['地址'],['坪數'],['屋況'],['風格'],['負責人']].map(function(f){return '<div class="kv"><label>'+(f[0]==='地址'?'施工地址':f[0])+'</label><div class="val">'+esc(f[0]==='地址'?siteAddr(k,c):k[f[0]])+'</div></div>'}).join('')+
+    '<div class="kv"><label>合約總價</label><div class="val amt">$'+money(k['合約總價'])+'</div></div></div><div class="stage-wrap"><label>階段</label><div class="stepper">'+BH.STAGES.map(function(s){return '<button type="button" class="'+(k['階段']===s?'on':'')+'" onclick="setStage(\''+s+'\')">'+s+'</button>'}).join('')+'</div></div></div>';
+  h+='<div class="card"><div class="card-hd"><h3>報價版本</h3><div class="acts"><button class="p" onclick="openEditor()">＋新報價</button></div></div><div class="scroll"><table><tr><th>版本</th><th>日期</th><th class="num">總價</th><th class="num">毛利率</th><th>狀態</th><th class="hide-m">變更說明</th><th></th></tr>'+
     qs.map(function(q){return '<tr><td>V'+q['版本']+'</td><td>'+q['日期']+'</td><td class="num">'+money(q['總價'])+'</td><td class="num">'+(q['成本']?q['毛利率%']+'%':'<span class="muted">缺成本</span>')+'</td><td><select onchange="qStatus(\''+q['報價ID']+'\',this.value)">'+['草稿','已送出','已簽約','作廢'].map(function(s){return '<option'+(s===q['狀態']?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td class="hide-m">'+esc(q['變更說明'])+'</td><td style="white-space:nowrap"><button class="s" onclick="openEditor(\''+q['報價ID']+'\')">複製修改</button> <button class="s" onclick="openPrint(\''+q['報價ID']+'\')">報價單</button></td></tr>'}).join('')+'</table></div>'+(qs.length?'':'<p class="muted">還沒有報價。</p>')+'</div>';
   var ps=pays(k['案件ID']);
-  h+='<div class="card"><div class="row"><b style="margin-right:auto">收款（訂金10/開工40/木作結束40/驗收10）</b>'+(ps.length?'':'<button class="p" onclick="mkPay()">建立收款期別</button>')+'</div><div class="scroll"><table><tr><th>期別</th><th class="num">應收</th><th>應收日期</th><th class="num">已收</th><th>收款日</th><th class="num">餘額</th><th></th></tr>'+
+  h+='<div class="card"><div class="card-hd"><h3>收款 <span class="sub">訂金 10／開工 40／木作結束 40／驗收 10</span></h3>'+(ps.length?'':'<div class="acts"><button class="p" onclick="mkPay()">建立收款期別</button></div>')+'</div><div class="scroll"><table><tr><th>期別</th><th class="num">應收</th><th>應收日期</th><th class="num">已收</th><th>收款日</th><th class="num">餘額</th><th></th></tr>'+
     ps.map(function(p,i){var late=bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today;
       return '<tr style="'+(late?'color:var(--r);font-weight:600':'')+'"><td>'+p['期別']+' '+p['比例%']+'%</td><td class="num">'+money(p['應收金額'])+'</td><td><input type="date" id="pd'+i+'" value="'+esc(p['應收日期'])+'"></td><td><input id="pr'+i+'" value="'+bhNum(p['已收金額'])+'" style="width:100px"></td><td><input type="date" id="pp'+i+'" value="'+esc(p['收款日'])+'"></td><td class="num">'+money(p['餘額'])+'</td><td><button class="s" onclick="savePay('+i+')">存</button></td></tr>'}).join('')+'</table></div><p class="muted">有應收日期、到期且未收清的期別會標紅；每天 9 點自動寄提醒給老闆（含 3 天內到期）。</p></div>';
   var ss=scheds(k['案件ID']);
-  h+='<div class="card"><div class="row"><b style="margin-right:auto">工期表・合約</b><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
+  h+='<div class="card"><div class="card-hd"><h3>工期表・合約</h3><div class="acts"><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button></div></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
     ss.map(function(x){return '<tr><td>S'+x['版本']+'</td><td>'+esc(x['報價ID'])+'</td><td>'+x['開工日']+'</td><td>'+x['完工日']+'</td><td class="num">'+x['工作天數']+'</td><td style="white-space:nowrap"><button class="s" onclick="openSched(\''+x['工期ID']+'\')">複製修改</button> <button class="s" onclick="openSchedPrint(\''+x['工期ID']+'\')">工期表</button></td></tr>'}).join('')+'</table></div>'+
     (ss.length?'':'<p class="muted">還沒有工期表。有報價會用「已簽約」的報價（沒有的話用最新版）帶入工種；沒有報價也可以直接產生，自己加工項。</p>')+'<p class="muted">合約不需要報價，會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p></div>';
   $('#app').innerHTML=h;
@@ -358,11 +452,11 @@ function openEditor(fromId){
 }
 function vEditor(){
   var k=kase(S.caseId);
-  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 新報價'+(S.fromId?'（從 '+S.fromId+' 複製）':'')+'</b><p class="muted">輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算（1尺=30.3cm、1才=30.3×30.3cm、1坪=33,058cm²）；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
+  var h='<div class="card"><div class="card-hd"><h3>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 新報價'+(S.fromId?'（從 '+S.fromId+' 複製）':'')+'</h3></div><p class="muted">輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算（1尺=30.3cm、1才=30.3×30.3cm、1坪=33,058cm²）；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
   BH.CATEGORIES.map(function(c,ci){return '<datalist id="items'+ci+'">'+D.prices.filter(function(p){return p['工程類別']===c}).map(function(p){return '<option value="'+esc(p['項目'])+'">$'+p['報價單價']+'/'+p['單位']+'</option>'}).join('')+'</datalist>'}).join('')+
   '<div class="scroll"><table class="ed"><tr><th>工程類別</th><th>項目</th><th>寬cm</th><th>高/深cm</th><th>數量</th><th>單位</th><th>成本價</th><th>報價單價</th><th class="num">小計</th><th>廠商</th><th>備註</th><th></th></tr><tbody id="lines"></tbody></table></div>'+
   '<br><div class="row"><button class="s" onclick="addLine()">＋加一列</button></div></div>'+
-  '<div class="card"><div class="grid"><div><label>變更說明（存成新版本）</label><input id="qnote" placeholder="例：客戶刪除吧檯，改系統櫃"></div><div><label>狀態</label><select id="qst"><option>草稿</option><option>已送出</option></select></div></div><br><div class="row"><button class="p" onclick="saveQ()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div></div>'+
+  '<div class="card"><div class="card-hd"><h3>儲存此版本</h3></div><div class="grid"><div class="kv"><label>變更說明（存成新版本）</label><input id="qnote" placeholder="例：客戶刪除吧檯，改系統櫃"></div><div class="kv"><label>狀態</label><select id="qst"><option>草稿</option><option>已送出</option></select></div></div><div class="row acts"><button class="p" onclick="saveQ()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div></div>'+
   '<div class="sum" id="sum"></div>';
   $('#app').innerHTML=h; if(!S.lines.length) addLine(); else drawLines();
 }
@@ -396,7 +490,7 @@ function saveQ(){var ls=S.lines.filter(function(l){return l.item});if(!ls.length
 // ---- 單價庫 ----
 function vPrices(){
   var f=S.pf||'';
-  var h='<div class="card"><div class="row"><b style="margin-right:auto">項目單價庫（'+D.prices.length+' 項）</b><input placeholder="搜尋" style="max-width:200px" value="'+esc(f)+'" oninput="S.pf=this.value;vPrices();var e=document.querySelector(\'[placeholder=搜尋]\');e.focus();e.setSelectionRange(99,99)"><button class="p" onclick="editPrice()">＋新增項目</button></div><p class="muted">黃底＝網路行情待確認。成本價請老闆補上，報價才算得出毛利。</p><div class="scroll"><table><tr><th>工程類別</th><th>項目</th><th>單位</th><th class="num">成本價</th><th class="num">報價單價</th><th class="hide-m">價格來源</th><th class="hide-m">量測依據</th><th></th></tr>'+
+  var h='<div class="card"><div class="card-hd"><h3>項目單價庫（'+D.prices.length+' 項）</h3><input class="search" placeholder="搜尋" value="'+esc(f)+'" oninput="S.pf=this.value;vPrices();var e=document.querySelector(\'[placeholder=搜尋]\');e.focus();e.setSelectionRange(99,99)"><div class="acts"><button class="p" onclick="editPrice()">＋新增項目</button></div></div><p class="muted">黃底＝網路行情待確認。成本價請老闆補上，報價才算得出毛利。</p><div class="scroll"><table><tr><th>工程類別</th><th>項目</th><th>單位</th><th class="num">成本價</th><th class="num">報價單價</th><th class="hide-m">價格來源</th><th class="hide-m">量測依據</th><th></th></tr>'+
   D.prices.filter(function(p){return !f||(p['項目']+p['工程類別']).indexOf(f)>=0}).map(function(p){return '<tr class="'+(p['價格來源']==='網路行情待確認'?'web':'')+'"><td>'+esc(p['工程類別'])+'</td><td>'+esc(p['項目'])+'</td><td>'+esc(p['單位'])+'</td><td class="num">'+(p['成本價']===''?'<span class="muted">—</span>':money(p['成本價']))+'</td><td class="num">'+money(p['報價單價'])+'</td><td class="hide-m">'+esc(p['價格來源'])+'</td><td class="hide-m muted">'+esc(p['量測依據'])+'</td><td><button class="s" onclick="editPrice(\''+p['項目ID']+'\')">編輯</button></td></tr>'}).join('')+'</table></div></div>';
   $('#app').innerHTML=h;
 }
@@ -410,7 +504,7 @@ function vPrint(){
   var q=D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,rate=bhNum(st['設計監工費率']||0.05);
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
   var cats=BH.CATEGORIES.filter(function(x){return r.byCat[x]}),pay=bhPaySchedule(r.total);
-  var h='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div><div class="pq">'+
+  var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div><div class="pq">'+
   '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' 工程預算總表</h2><div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
   '<table><tr><th>項次</th><th>品名</th><th>單位</th><th>數量</th><th class="num">總價</th><th>備註</th></tr>'+
   cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
@@ -438,10 +532,10 @@ function openSched(fromId){
     S.sv={start:bhNextWork(D.today,skipDay(),D.holidays),qid:q['報價ID'],note:'',rows:bhScheduleRowsFromCats(cats,durMap())};S.view='sched';render()})}
 function schedCalc(){return bhSchedule(S.sv.rows,S.sv.start,skipDay(),D.holidays)}
 function vSched(){var k=kase(S.caseId),qs=caseQuotes(k['案件ID']);
-  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 工期表'+(S.sv.from?'（從 '+S.sv.from+' 複製）':'')+'</b><p class="muted">工種來自報價（沒有報價時用下方「＋加工項」自己加），天數是「工期預設」分頁的預設值，可直接改。休息日：'+(skipDay()==='六日'?'週六、日':skipDay()==='日'?'週日':'不休')+'＋「假日」分頁的國定假日。勾「同時」表示與上一項同一天開工。</p>'+
+  var h='<div class="card"><div class="card-hd"><h3>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 工期表'+(S.sv.from?'（從 '+S.sv.from+' 複製）':'')+'</h3></div><p class="muted">工種來自報價（沒有報價時用下方「＋加工項」自己加），天數是「工期預設」分頁的預設值，可直接改。休息日：'+(skipDay()==='六日'?'週六、日':skipDay()==='日'?'週日':'不休')+'＋「假日」分頁的國定假日。勾「同時」表示與上一項同一天開工。</p>'+
   '<div class="grid"><div><label>開工日</label><input type="date" id="sStart" value="'+esc(S.sv.start)+'" onchange="S.sv.start=this.value;drawSched()"></div><div><label>依據報價</label><select onchange="S.sv.qid=this.value">'+qs.map(function(q){return '<option'+(q['報價ID']===S.sv.qid?' selected':'')+'>'+q['報價ID']+'</option>'}).join('')+'<option value=""'+(S.sv.qid?'':' selected')+'>不依報價</option></select></div><div><label>備註（存成新版本）</label><input id="sNote" placeholder="例：木作延後一週"></div></div></div>'+
   '<div class="card"><div class="scroll"><table class="ed"><tr><th>#</th><th>工程類別</th><th>天數</th><th>同時</th><th>開始</th><th>結束</th><th>備註</th><th></th></tr><tbody id="srows"></tbody></table></div><br><div class="row"><select id="sAdd">'+BH.CATEGORIES.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select><button class="s" onclick="S.sv.rows.push({cat:$(\'#sAdd\').value,days:durMap()[$(\'#sAdd\').value]||BH.DURATIONS[$(\'#sAdd\').value]||3});drawSched()">＋加工項</button></div></div>'+
-  '<div class="sum" id="ssum"></div><br><div class="card row"><button class="p" onclick="saveSched()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div>';
+  '<div class="sum" id="ssum"></div><div class="card"><div class="row acts"><button class="p" onclick="saveSched()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div></div>';
   $('#app').innerHTML=h;drawSched()}
 function drawSched(){var r=schedCalc();
   $('#srows').innerHTML=r.rows.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td><input style="min-width:110px" value="'+esc(x.cat)+'" onchange="S.sv.rows['+i+'].cat=this.value"></td><td><input inputmode="numeric" style="width:60px" value="'+x.days+'" onchange="S.sv.rows['+i+'].days=this.value;drawSched()"></td><td><input type="checkbox" style="width:auto"'+(x.par?' checked':'')+(i?'':' disabled')+' onchange="S.sv.rows['+i+'].par=this.checked;drawSched()"></td><td>'+x.start.slice(5)+'</td><td>'+x.end.slice(5)+'</td><td><input style="width:110px" value="'+esc(x.note)+'" onchange="S.sv.rows['+i+'].note=this.value"></td><td style="white-space:nowrap"><button class="s" onclick="mvS('+i+',-1)">↑</button><button class="s" onclick="mvS('+i+',1)">↓</button><button class="s" onclick="S.sv.rows.splice('+i+',1);drawSched()">✕</button></td></tr>'}).join('');
@@ -457,7 +551,7 @@ function vSchedPrint(){var s=(D.schedules||[]).filter(function(x){return x['工�
   var rowsN=BH.SCHED_ROWS.slice();S.sr.forEach(function(r){if(rowsN.indexOf(r['工程類別'])<0)rowsN.splice(rowsN.indexOf('清潔工程'),0,r['工程類別'])});
   var months=[],d=bhD(s['開工日']);d.setUTCDate(1);while(bhDs(d)<=s['完工日']){months.push(bhDs(d).slice(0,7));d.setUTCMonth(d.getUTCMonth()+1)}
   var wcount={},n=0,dd=bhD(s['開工日']);while(bhDs(dd)<=s['完工日']){var x=bhDs(dd);if(bhIsWork(x,skipDay(),D.holidays))wcount[x]=++n;dd.setUTCDate(dd.getUTCDate()+1)}
-  var h='<div class="noprint row" style="max-width:1100px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF（A4 橫向，一月一頁）</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>';
+  var h='<div class="noprint toolbar wide"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF（A4 橫向，一月一頁）</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>';
   h+=months.map(function(m,pi){var y=+m.slice(0,4),mo=+m.slice(5),nd=new Date(Date.UTC(y,mo,0)).getUTCDate(),days=[];for(var i=1;i<=nd;i++)days.push(m+'-'+(i<10?'0':'')+i);
     var off=function(x){return !bhIsWork(x,skipDay(),D.holidays)},cell=function(x,inner){return '<td class="dc'+(off(x)?' off':'')+'">'+(inner||'')+'</td>'};
     var pad='';for(var j=nd;j<31;j++)pad+='<td class="dc"></td>';
@@ -484,7 +578,7 @@ function contractMap(){var k=kase(S.caseId),c=cust(k['客戶ID']),st=D.settings,
     '付款表':pl.length?pl.map(function(p,i){var amt=Math.round(bhNum(p.amount));return cn[i]+'、'+(i===0?'本契約簽訂日，甲方支付工程總價'+p.pct+'%簽約金計'+amt+'元。':'依附件進行至節點'+(i+1)+'：'+(BH.PAY_NODES[p.name]||p.name)+'時，甲方'+(i===pl.length-1?'應':'')+'支付工程總價'+p.pct+'%計'+amt+'元。')}).join('\n'):'',
     '開工日':s['開工日'],'完工日':s['完工日'],'開工日民國':s['開工日']?bhRoc(s['開工日']):'','完工日民國':s['完工日']?bhRoc(s['完工日']):'','工作天數':s['工作天數'],'工期編號':s['工期ID'],'代辦費用':'','規費預付日數':''}}
 function vContract(){var m=contractMap(),miss=Object.keys(m).filter(function(x){return (m[x]===''||m[x]==null)&&['代辦費用','規費預付日數','乙方登記證號'].indexOf(x)<0}),F=function(t){return esc(bhFill(t,m))};
-  var h='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'ctEdit\';render()">編輯合約範本</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>'+
+  var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'ctEdit\';render()">編輯合約範本</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>'+
   '<div class="card noprint row" style="max-width:800px;margin:0 auto 10px"><label>甲方地址</label><input id="ovA" style="flex:1" value="'+esc(m['甲方地址'])+'"><label>工程地點</label><input id="ovS" style="flex:1" value="'+esc(m['工程地點'])+'"><button class="s" onclick="S.ctOv={c:S.caseId,\'甲方地址\':$(\'#ovA\').value,\'工程地點\':$(\'#ovS\').value};render()">套用（只改這份）</button></div>'+(miss.length?'<div class="card noprint muted" style="max-width:800px;margin:0 auto 10px">⚠ 以下資料空白，會印成底線讓你手寫：'+miss.join('、')+'</div>':'')+
   '<div class="pq ct"><img class="plogo" src="'+BH_LOGO+'"><h2>建築物室內裝修—'+F('{{案名}}')+'工程承攬契約書</h2>'+
   '<p>立契約書人──消費者：'+F('{{甲方姓名}}')+'　（以下簡稱甲方）<br>業者：'+F('{{乙方負責人}}')+'　（以下簡稱乙方）<br>乙方登記證書字號或專業證照字號：'+F('{{乙方登記證號}}')+'<br>茲因甲方委託乙方辦理室內裝修工程，經雙方同意訂立本契約，約定條款如下：</p>'+
@@ -507,12 +601,12 @@ function openCrfId(id,ro){api('getCRF',id).then(function(r){S.crf=r;S.crfRO=!!ro
 function crfInput(f,v){var k=f[0];if(f[2]==='checks'||f[2]==='radio'){v=v||(f[2]==='checks'?[]:'');return '<div class="opts">'+f[3].map(function(o){var on=f[2]==='checks'?v.indexOf(o)>=0:v===o;return '<label><input type="'+(f[2]==='checks'?'checkbox':'radio')+'" name="cf_'+k+'" value="'+esc(o)+'"'+(on?' checked':'')+'>'+esc(o)+'</label>'}).join('')+'</div>'}
   if(f[2]==='textarea')return '<textarea data-cf="'+k+'" rows="3">'+esc(v)+'</textarea>';return '<input data-cf="'+k+'" type="'+(f[2]==='date'?'date':'text')+'" value="'+esc(v)+'">'}
 function vCrf(){var r=S.crf,d=r.data||{},k=kase(r.row['案件ID'])||{};
-  var h='<div class="card crfed"><div class="row"><b style="margin-right:auto">📝 客戶需求表 '+esc(r.row['需求表ID']||'（新）')+(r.row['填表方式']==='線上'?' <span class="tag">客戶線上填寫</span>':'')+'</b><button class="s" onclick="crfSave(1)">🖨 存檔並列印</button></div>'+
+  var h='<div class="card crfed"><div class="card-hd"><h3>📝 客戶需求表 '+esc(r.row['需求表ID']||'（新）')+(r.row['填表方式']==='線上'?' <span class="tag">客戶線上填寫</span>':'')+'</h3><div class="acts"><button class="s" onclick="crfSave(1)">🖨 存檔並列印</button></div></div>'+
   CRF.SECTIONS.map(function(sec){return '<h4>'+sec[0]+'</h4><div class="grid">'+sec[1].map(function(f){var wide=f[2]==='checks'||f[2]==='radio'||f[2]==='textarea';
     return '<div'+(wide?' style="grid-column:1/-1"':'')+'><label>'+f[1]+'</label>'+crfInput(f,d[f[0]])+'</div>'}).join('')+'</div>'}).join('')+
   '<p><label style="display:inline"><input type="checkbox" id="cfOk" style="width:auto"'+(d['_同意']?' checked':'')+'> 客戶已同意個資條款</label></p>'+
-  '<div class="row"><button class="p" onclick="crfSave()">儲存</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div></div>';
-  h+='<div class="card"><b>聯繫紀錄</b><div class="scroll"><table><tr><th style="width:120px">日期</th><th>內容</th></tr>'+(r.contacts||[]).map(function(c){return '<tr><td>'+esc(c['日期'])+'</td><td>'+esc(c['內容'])+'</td></tr>'}).join('')+'</table></div>'+
+  '<div class="row acts"><button class="p" onclick="crfSave()">儲存</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div></div>';
+  h+='<div class="card"><div class="card-hd"><h3>聯繫紀錄</h3></div><div class="scroll"><table><tr><th style="width:120px">日期</th><th>內容</th></tr>'+(r.contacts||[]).map(function(c){return '<tr><td>'+esc(c['日期'])+'</td><td>'+esc(c['內容'])+'</td></tr>'}).join('')+'</table></div>'+
   (r.row['需求表ID']?'<div class="row" style="margin-top:6px"><input type="date" id="ctD" value="'+D.today+'" style="max-width:160px"><input id="ctT" placeholder="例：電話約丈量 11/5 下午" style="flex:1"><button class="p" id="ctAdd" onclick="crfAddCt()">＋新增</button></div>':'<p class="muted">先儲存需求表才能新增聯繫紀錄。</p>')+'</div>';
   $('#app').innerHTML=h}
 function crfCollect(){var o={};crfFields().forEach(function(f){var k=f[0];if(f[2]==='checks')o[k]=[].slice.call(document.querySelectorAll('[name="cf_'+k+'"]:checked')).map(function(i){return i.value});
@@ -521,7 +615,7 @@ function crfSave(pr){var d=crfCollect();api('saveCRF',S.crf.row,d).then(function
   return load().then(function(){return api('getCRF',res.id)}).then(function(r){S.crf=r;S.view=pr?'crfPrint':'crf';render()})})}
 function crfAddCt(){var t=$('#ctT').value;if(!t.trim())return;api('addContact',S.crf.row['需求表ID'],$('#ctD').value,t).then(function(){return api('getCRF',S.crf.row['需求表ID'])}).then(function(r){S.crf=r;toast('已新增聯繫紀錄');vCrf()})}
 function convCrf(id){api('convertCRF',id).then(function(r){toast('已建立 '+r.customerId+' / '+r.caseId);S.caseId=r.caseId;S.view='case';load()})}
-function vCrfPrint(){var r=S.crf;$('#app').innerHTML='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button>'+(r.row['狀態']==='待處理'?'<button class="p" onclick="convCrf(\''+r.row['需求表ID']+'\')">轉成客戶＋案件</button>':'<button class="s" onclick="S.view=\'crf\';render()">編輯</button>')+'<button class="s" onclick="S.view=S.crf.row[\'案件ID\']?\'case\':\'list\';render()">返回</button></div>'+
+function vCrfPrint(){var r=S.crf;$('#app').innerHTML='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button>'+(r.row['狀態']==='待處理'?'<button class="p" onclick="convCrf(\''+r.row['需求表ID']+'\')">轉成客戶＋案件</button>':'<button class="s" onclick="S.view=\'crf\';render()">編輯</button>')+'<button class="s" onclick="S.view=S.crf.row[\'案件ID\']?\'case\':\'list\';render()">返回</button></div>'+
   crfPrintHtml(r.data,r.contacts,{id:r.row['客戶ID']||r.row['需求表ID']})}
 
 document.getElementById('hdLogo').src=BH_LOGO;$('#lgLogo').src=BH_LOGO;
