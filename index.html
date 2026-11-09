@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>蜂宅 CRM・報價</title><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--y:#ffd200;--g:#7a868d;--d:#222;--g:#888;--r:#d9363e;--bg:#faf8f3}
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;background:var(--bg);color:var(--d);font-size:15px}
+header{background:var(--d);color:#fff;display:flex;align-items:center;gap:6px;padding:10px 12px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header b{color:var(--y);margin-right:auto;font-size:17px}
+header button{background:none;border:1px solid #555;color:#fff;border-radius:6px;padding:6px 10px}
+header button.on{background:var(--y);color:#222;border-color:var(--y)}
+main{padding:12px;max-width:1200px;margin:auto}
+.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px #0001}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips button{border:1px solid #ccc;background:#fff;border-radius:16px;padding:5px 12px;margin:2px}
+.chips button.on{background:var(--d);color:#fff}
+.case{display:flex;justify-content:space-between;gap:8px;cursor:pointer;border-left:5px solid var(--y)}
+.case.unpaid{border-left-color:var(--r)}.tag{font-size:12px;padding:2px 8px;border-radius:10px;background:#eee}
+.tag.red{background:var(--r);color:#fff}.muted{color:var(--g);font-size:13px}
+button.p{background:var(--y);border:0;border-radius:6px;padding:8px 14px;font-weight:600}
+button.s{background:#fff;border:1px solid #bbb;border-radius:6px;padding:7px 12px}
+input,select,textarea{font:inherit;padding:6px;border:1px solid #ccc;border-radius:6px;width:100%}
+label{font-size:12px;color:var(--g);display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #eee;padding:5px;text-align:left;font-size:14px}
+.num{text-align:right}.scroll{overflow-x:auto}
+.ed td input,.ed td select{padding:4px;min-width:60px}.ed td{padding:3px}
+.sum{position:sticky;bottom:0;background:#222;color:#fff;border-radius:10px;padding:10px;display:flex;gap:16px;flex-wrap:wrap}
+.sum b{color:var(--y)}.bad{color:#ff8a8a!important}
+.web{background:#fff3cd}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:20px;display:none;z-index:9}
+/* 列印報價單 */
+.pq{background:#fff;padding:24px;max-width:800px;margin:auto;font-size:14px}
+.pq h2{text-align:center;letter-spacing:2px}.pq table td,.pq table th{border:1px solid #333;padding:6px}
+.pq .hd{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+@media(max-width:700px){.hide-m{display:none}}
+.gs{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif}.gt{text-align:center;font-size:28px;font-weight:700;letter-spacing:4px}
+.gsub{display:flex;justify-content:space-between;align-items:center;margin:4px 0 6px}.gsub b{font-size:16px;letter-spacing:6px}.gsub span{font-size:12px;min-width:160px;text-align:right}
+.gantt{width:100%;table-layout:fixed}.gantt th,.gantt td{border:1px solid #333!important;padding:2px;font-size:12px;text-align:center;height:22px}
+.gantt .gn{width:110px;text-align:left;font-weight:600;white-space:nowrap}.gantt .dc{padding:0;font-size:11px;position:relative}.gantt .off{background:#f4a6a6}
+.ghd td{text-align:left;font-size:13px;height:26px}.gft td{text-align:left;height:36px}.gnote{position:absolute;left:2px;top:1px;white-space:nowrap;font-size:10px;color:#a00;z-index:1}
+.pq.gs{max-width:1100px;page:land}@media screen{.gsw{overflow-x:auto}.gsw .pq.gs{min-width:1000px}}@page land{size:A4 landscape;margin:8mm}
+.ct{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif}.ct p{line-height:1.9;margin:6px 0}.ct .art b{font-weight:700}.sig p{line-height:2}
+.ctb{border-top:1px solid #eee;padding:8px 0}.ctb input{font-weight:600;margin-bottom:4px}
+@media print{.gs .gt{font-size:22px}.gs .gantt th,.gs .gantt td{height:18px;font-size:10px}.gs .ghd td{height:18px}.gs .gft td{height:24px}.pq.gs{break-inside:avoid}.gsw+.gsw{break-before:page}.gantt .off{-webkit-print-color-adjust:exact;print-color-adjust:exact}.scroll{overflow:visible}header,.noprint{display:none!important}body{background:#fff}main{padding:0}.pq{padding:0}.pb{page-break-before:always}}
+.crf{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;width:190mm;margin:auto;color:#111;font-size:12.5px;background:#fff}.cf-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ffd200;padding-bottom:4px;margin-bottom:6px}.cf-t{font-size:22px;font-weight:700;letter-spacing:2px}.cf-t small{font-size:13px;font-weight:400;color:#555;letter-spacing:0}.cf-logo{height:44px;display:block}.cf-sec{border:1.5px solid #222;margin-bottom:6px;padding:0 8px 6px}.cf-h{background:#ffd200;margin:0 -8px 6px;padding:3px 8px;display:flex;justify-content:space-between;border-bottom:1.5px solid #222}.cf-h.c{justify-content:center}.cf-h b{letter-spacing:4px}.cf-consent{margin:2px 0 4px;font-size:11.5px}.cf-g1,.cf-g2,.cf-g3{display:grid;gap:2px 14px;margin:5px 0;line-height:1.8}.cf-g2{grid-template-columns:1fr 1fr}.cf-g3{grid-template-columns:1fr 1fr 1fr}.cf-g2>div,.cf-g3>div,.cf-g1{display:flex;flex-wrap:wrap;align-items:baseline}.cf-l{white-space:nowrap;margin-right:2px}.cf-u{flex:1;border-bottom:1px solid #333;min-height:18px;padding:0 4px;color:#1a3fa0}.cf-c{margin-right:10px;white-space:nowrap}.cf-note .cf-u{min-height:36px}.cf-tb{width:100%;border-collapse:collapse}.cf-tb th,.cf-tb td{border:1px solid #333;height:22px;padding:2px 6px;font-size:12px;text-align:left;color:#1a3fa0}.cf-tb th{text-align:center;color:#111;background:#fdf3d0}.cf-foot{text-align:center;font-size:10.5px;color:#777}@media print{@page{size:A4 portrait;margin:9mm}.crf{width:auto}}
+.crfed .opts{display:flex;flex-wrap:wrap;gap:4px}.crfed .opts label{display:inline-flex;align-items:center;gap:3px;border:1px solid #ccc;border-radius:14px;padding:3px 10px;font-size:14px;color:#222}.crfed .opts input{width:auto}
+.crfed h4{margin:10px 0 4px;background:var(--y);padding:3px 8px;border-radius:6px}
+.brand{display:flex;align-items:center;gap:8px}#hdLogo{height:30px;background:#fff;border-radius:6px;padding:2px 6px}
+.plogo{height:46px;display:block;margin:0 0 6px auto}
+
+#login{display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px}
+#login form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:6px}#login h3{margin:4px 0 8px}#lgLogo{height:46px;align-self:flex-start}
+#login label{font-size:13px;color:var(--g)}#login input{width:100%;padding:9px;border:1px solid #ccc;border-radius:6px;font-size:16px}
+#login button{margin-top:8px}#lgErr{color:var(--r);min-height:1.2em;font-size:14px}#lgUrlRow{display:flex;flex-direction:column;gap:6px}
+#ft{text-align:center;padding:10px 0 24px}#ft .out{background:none;border:0;color:var(--g);text-decoration:underline;font-size:13px}
+</style></head><body>
+<header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> CRM・報價</b>
+<button data-v="list">案件</button><button data-v="prices">單價庫</button><button onclick="newCustomer()">＋客戶</button></header>
+<main id="app"></main><footer id="ft" class="noprint"><button class="out" onclick="logout()">登出這台裝置</button></footer><div id="login"><form id="lgForm" class="card"><img id="lgLogo" alt="蜂宅 BEE HOME"><h3>蜂宅 CRM・報價</h3>
+<div id="lgUrlRow"><label>Apps Script 網址（只要貼一次）</label><input id="lgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
+<label>密碼</label><input id="lgPw" type="password" autocomplete="current-password">
+<button class="p" id="lgBtn" type="submit">登入</button><div id="lgErr"></div></form></div>
+<div id="toast"></div>
+<script>
+// ===== 共用計算邏輯（伺服器與網頁共用）=====
+var BH = {
+  CM_PER_CHI: 30.3,          // 1 台尺 = 30.3 cm
+  CM2_PER_PING: 33058,       // 1 坪 ≈ 3.3058 m² = 33058 cm²
+  CM2_PER_CAI: 918.09,       // 1 才 = 1 台尺 × 1 台尺 = 30.3² cm²
+  CATEGORIES: ['保護工程','拆除工程','泥作工程','水電工程','木作工程','智能家居工程','其他工程','油漆工程','系統櫃工程','燈具工程','清潔工程','木地板工程','客變工程'],
+  STAGES: ['詢問','丈量','提案','簽約','施工','完工'],
+  PAYMENTS: [['訂金',10],['開工',40],['木作結束',40],['驗收',10]],
+  DESIGN_FEE_RATE: 0.05
+};
+function bhNum(v){ var n = parseFloat(String(v==null?'':v).replace(/,/g,'')); return isNaN(n)?0:n; }
+function bhRound(n,d){ var p=Math.pow(10,d==null?2:d); return Math.round((n+1e-9)*p)/p; }
+// 依單位把公分換算成數量。w=寬/長(cm)，h=高/深(cm)，可省略
+function bhConvert(unit, w, h){
+  w=bhNum(w); h=bhNum(h);
+  switch(unit){
+    case '尺': return bhRound(w/BH.CM_PER_CHI,1);
+    case '坪': return h? bhRound(w*h/BH.CM2_PER_PING,2) : 0;
+    case '才': return h? Math.ceil(bhRound(w*h/BH.CM2_PER_CAI,2)*10)/10 : 0;
+    case 'm':  return bhRound(w/100,2);
+    case 'm²': case '平方米': return h? bhRound(w*h/10000,2) : 0;
+    default: return null; // 個/組/式等：無法換算，請手填數量
+  }
+}
+function bhSizeLabel(w,h){ w=bhNum(w);h=bhNum(h); if(!w) return ''; return h? (w+'×'+h+'cm') : (w+'cm'); }
+// 計算報價：lines=[{category,qty,cost,price}]
+function bhCalcQuote(lines, feeRate){
+  feeRate = feeRate==null?BH.DESIGN_FEE_RATE:feeRate;
+  var byCat={}, sub=0, cost=0, missingCost=0;
+  lines.forEach(function(l){
+    var q=bhNum(l.qty), s=bhRound(q*bhNum(l.price),0);
+    var c=bhRound(q*bhNum(l.cost),0);
+    if(l.cost===''||l.cost==null) missingCost++;
+    byCat[l.category]=(byCat[l.category]||0)+s; sub+=s; cost+=c;
+  });
+  var fee=bhRound(sub*feeRate,0), total=sub+fee;
+  var margin=total-cost;
+  return {byCat:byCat, subtotal:sub, fee:fee, total:total, cost:cost, margin:margin,
+          marginPct: total? bhRound(margin/total*100,1):0, missingCost:missingCost};
+}
+function bhPaySchedule(total){
+  var out=[], acc=0;
+  BH.PAYMENTS.forEach(function(p,i){
+    var amt = i===BH.PAYMENTS.length-1 ? total-acc : Math.round(total*p[1]/100);
+    acc+=amt; out.push({name:p[0], pct:p[1], amount:amt});
+  });
+  return out;
+}
+function bhNextId(prefix, ids, width){
+  var max=0; ids.forEach(function(id){ id=String(id); if(id.indexOf(prefix)===0){ var n=parseInt(id.slice(prefix.length),10); if(n>max) max=n; }});
+  var s=String(max+1); while(s.length<width) s='0'+s; return prefix+s;
+}
+
+// ===== 工期表 =====
+// 工期進度表的固定列（順序同蜂宅過往工期進度表）
+BH.SCHED_ROWS=['保護工程','拆除工程','泥作工程','木作工程','水電/弱電工程','空調(設備)工程','鋁窗/鐵窗工程','油漆工程','壁紙傢飾工程','燈具工程','系統櫃工程','清潔工程','窗簾工程'];
+// 預設工作天數（由過往工期表的實際施工天數估算，老闆可在「工期預設」分頁修改）
+BH.DURATIONS={'保護工程':2,'拆除工程':3,'泥作工程':5,'水電/弱電工程':5,'空調(設備)工程':5,'鋁窗/鐵窗工程':3,'木作工程':20,'油漆工程':10,'木地板工程':3,'系統櫃工程':10,'燈具工程':2,'清潔工程':1,'壁紙傢飾工程':4,'窗簾工程':2};
+// 實際施工先後（過往工期表：保護→拆除→水電＋空調→木作→油漆→系統櫃→燈具→清潔→壁紙＋窗簾）
+BH.SCHED_ORDER=['保護工程','拆除工程','泥作工程','水電/弱電工程','空調(設備)工程','鋁窗/鐵窗工程','木作工程','油漆工程','木地板工程','系統櫃工程','燈具工程','清潔工程','壁紙傢飾工程','窗簾工程'];
+BH.SCHED_PAR={'空調(設備)工程':1,'窗簾工程':1};  // 與上一項同時開工
+// 報價工程類別 → 工期表列
+BH.CAT_TO_SCHED={'保護工程':'保護工程','拆除工程':'拆除工程','泥作工程':'泥作工程','水電工程':'水電/弱電工程','智能家居工程':'水電/弱電工程','木作工程':'木作工程','油漆工程':'油漆工程','系統櫃工程':'系統櫃工程','燈具工程':'燈具工程','清潔工程':'清潔工程','木地板工程':'木地板工程'};
+function bhD(s){var m=String(s).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);return m?new Date(Date.UTC(+m[1],m[2]-1,+m[3])):null}
+function bhDs(d){return d.toISOString().slice(0,10)}
+// skip：'六日'＝週六日休、'日'＝只休週日、其他＝不跳過；holidays：['2026-01-01',...]
+function bhIsWork(ds,skip,holidays){var w=bhD(ds).getUTCDay();
+  if(skip==='六日'&&(w===0||w===6))return false; if(skip==='日'&&w===0)return false;
+  return !(holidays&&holidays.indexOf(ds)>=0)}
+function bhNextWork(ds,skip,hol){var d=bhD(ds);for(var i=0;i<400;i++){var s=bhDs(d);if(bhIsWork(s,skip,hol))return s;d.setUTCDate(d.getUTCDate()+1)}return ds}
+// 從 start（含）起算 n 個工作天，回傳最後一天
+function bhAddWork(start,n,skip,hol){var s=bhNextWork(start,skip,hol),c=1,d=bhD(s);n=Math.max(1,Math.round(bhNum(n)||1));
+  while(c<n){d.setUTCDate(d.getUTCDate()+1);if(bhIsWork(bhDs(d),skip,hol))c++}return bhDs(d)}
+function bhDayAfter(ds){var d=bhD(ds);d.setUTCDate(d.getUTCDate()+1);return bhDs(d)}
+// rows=[{cat,days,par}]；par=true 表示與上一項同時開工
+function bhSchedule(rows,start,skip,hol){var prevS=null,prevE=null,last=null;
+  var out=rows.map(function(r){var s=(r.par&&prevS)?prevS:(prevE?bhNextWork(bhDayAfter(prevE),skip,hol):bhNextWork(start,skip,hol));
+    var e=bhAddWork(s,r.days,skip,hol);var o={cat:r.cat,days:Math.max(1,Math.round(bhNum(r.days)||1)),par:!!r.par,note:r.note||'',start:s,end:e};
+    prevS=s;prevE=(prevE&&r.par&&prevE>e)?prevE:e;if(!last||e>last)last=e;return o});
+  var first=out.length?out[0].start:start,cal=0;if(out.length){cal=Math.round((bhD(last)-bhD(first))/864e5)+1}
+  var wd=0;if(out.length){var d=bhD(first);while(bhDs(d)<=last){if(bhIsWork(bhDs(d),skip,hol))wd++;d.setUTCDate(d.getUTCDate()+1)}}
+  return {rows:out,start:first,end:last||start,calendarDays:cal,workDays:wd}}
+// 報價中出現的工程類別 → 預設工期列（其他工程、客變工程不排入，可在編輯時自行加）
+function bhScheduleRowsFromCats(cats,dur){dur=dur||{};var has={};cats.forEach(function(c){var m=BH.CAT_TO_SCHED[c];if(m)has[m]=1});
+  return BH.SCHED_ORDER.filter(function(c){return has[c]}).map(function(c){return {cat:c,days:dur[c]||BH.DURATIONS[c]||3,par:!!BH.SCHED_PAR[c]}})}
+// 2026-11-02 → 中華民國115年11月2日
+function bhRoc(ds){var d=bhD(ds);return d?'中華民國'+(d.getUTCFullYear()-1911)+'年'+(d.getUTCMonth()+1)+'月'+d.getUTCDate()+'日':''}
+// ===== 合約 =====
+function bhChineseMoney(n){n=Math.round(bhNum(n));if(!n)return '新台幣零元整';var D='零壹貳參肆伍陸柒捌玖',U=['仟','佰','拾',''],B=['','萬','億'],str=String(n),out='',zero=false;
+  for(var i=0;i<str.length;i++){var pos=str.length-1-i,x=+str[i],ui=3-pos%4;
+    if(x){if(zero)out+='零';out+=D[x]+U[ui];zero=false}else zero=true;
+    if(pos%4===0&&pos>0){var grp=str.slice(Math.max(0,i-3),i+1);if(+grp)out+=B[pos/4]}}
+  return '新台幣'+out+'元整'}
+// {{欄位}} 換成資料；沒有資料就留底線空白
+function bhFill(text,map){return String(text||'').replace(/\{\{([^}]+)\}\}/g,function(_,k){var v=map[k.trim()];return (v===''||v==null)?'＿＿＿＿＿＿':String(v)})}
+//node
+if (typeof module!=='undefined') module.exports={BH:BH,bhConvert:bhConvert,bhCalcQuote:bhCalcQuote,bhPaySchedule:bhPaySchedule,bhNextId:bhNextId,bhNum:bhNum,bhSchedule:bhSchedule,bhAddWork:bhAddWork,bhChineseMoney:bhChineseMoney,bhFill:bhFill,bhScheduleRowsFromCats:bhScheduleRowsFromCats,bhRoc:bhRoc};
+
+var BH_LOGO = 'data:image/png;base64,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'; // build.py 會換成 assets/logo_300.png 的 base64
+// ===== 客戶需求表（CRF）欄位定義：系統、列印版、客戶線上表單共用 =====
+var CRF = {
+  SECTIONS: [
+    ['基本資料', [
+      ['姓名','客戶姓名','text',40], ['填表日期','填表日期','date'], ['電話','聯絡電話','tel',20], ['LINE','LINE ID','text',40],
+      ['地址','施工地址','text',120], ['建案名稱','建案／社區名稱','text',60], ['Email','E-mail','email',80],
+      ['丈量時間','方便丈量時間','text',60], ['規劃顧問','規劃顧問','staff',20]
+    ]],
+    ['訪談紀錄', [
+      ['客戶來源','從哪裡知道蜂宅','checks',['路過／門市','網路搜尋','Threads／IG／FB','雜誌媒體','親友介紹','舊客介紹','舊客續購','其他']],
+      ['使用經驗','裝修經驗','radio',['第一次裝修','曾有裝修經驗','曾使用過系統家具']],
+      ['屋況','屋況','radio',['新屋','舊屋翻新','預售屋']],
+      ['建物類型','建物類型','radio',['大樓','公寓','透天厝','其他']],
+      ['坪數','室內坪數','text',20], ['屋齡','屋齡（年）','text',20], ['交屋時間','交屋時間','text',40],
+      ['規劃空間','想規劃的空間','checks',['全室','玄關','客廳','餐廳','廚房','主臥','更衣室','小孩房','孝親房','書房','衛浴','陽台','其他']],
+      ['喜好風格','喜好風格','checks',['現代','北歐','日式／無印','美式','工業','古典','其他']],
+      ['風格說明','風格／色系說明','text',100],
+      ['家庭人數','家庭人數','text',20], ['家庭成員','家庭成員（長輩、小孩、寵物）','text',100],
+      ['裝修工程','需要的工程','checks',['拆除','泥作','水電','木作','系統櫃','油漆','地板','廚具','衛浴設備','燈具','窗簾','空調','其他']],
+      ['總預算','總預算','text',40], ['預計完工','希望完工時間','text',40], ['入住時間','預計入住時間','text',40],
+      ['其他需求','其他需求或想法','textarea',1000]
+    ]]
+  ],
+  // 只有客戶線上表單看得到的欄位（不含內部欄位）
+  INTERNAL: ['規劃顧問','丈量時間'],
+  CONSENT: '本人同意提供上列個人資料予蜂宅室內裝修有限公司，僅用於本次室內裝修諮詢、丈量、報價及後續聯繫，不另作其他用途。'
+};
+function crfFields(){ var o=[]; CRF.SECTIONS.forEach(function(s){ s[1].forEach(function(f){ o.push(f); }); }); return o; }
+// 驗證與清理：只收已定義欄位、去頭尾空白、限制長度、勾選項只收定義中的選項
+function crfClean(input, isPublic){
+  input = input || {}; var out = {}, err = [];
+  crfFields().forEach(function(f){
+    if (isPublic && CRF.INTERNAL.indexOf(f[0])>=0) return;
+    var v = input[f[0]], t = f[2];
+    if (t==='checks'){ var arr = Array.isArray(v)? v : (v? String(v).split('、') : []);
+      out[f[0]] = arr.map(String).filter(function(x){ return f[3].indexOf(x)>=0; }).filter(function(x,i,a){return a.indexOf(x)===i;}); return; }
+    v = String(v==null?'':v).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').trim();
+    if (t==='radio'){ out[f[0]] = f[3].indexOf(v)>=0 ? v : ''; return; }
+    var max = t==='date'?10 : (typeof f[3]==='number'? f[3] : 60);
+    if (v.length>max){ err.push(f[1]+'太長（最多 '+max+' 字）'); v=v.slice(0,max); }
+    if (t==='date' && v && !/^\d{4}-\d{2}-\d{2}$/.test(v)){ err.push(f[1]+'格式錯誤'); v=''; }
+    if (t==='email' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) err.push('E-mail 格式錯誤');
+    if (t==='tel' && v && !/^[0-9+\-()#\s]{6,20}$/.test(v)) err.push('電話格式錯誤');
+    // 試算表公式注入防護：開頭是 = + - @ 的文字前面加 '
+    if (/^[=+\-@]/.test(v) && t!=='tel') v = "'"+v;
+    out[f[0]] = v;
+  });
+  if (isPublic){
+    if (!out['姓名']) err.push('請填姓名');
+    if (!out['電話'] && !out['LINE'] && !out['Email']) err.push('電話、LINE、E-mail 至少填一項');
+  }
+  return {data: out, errors: err};
+}
+function crfEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+// A4 直式列印版。data 為空物件時印空白表；contacts=[{日期,內容}]
+function crfPrintHtml(data, contacts, meta){
+  data = data||{}; contacts = contacts||[]; meta = meta||{};
+  var F = {}; crfFields().forEach(function(f){ F[f[0]]=f; });
+  var val = function(k){ var v=data[k]; return crfEsc(Array.isArray(v)? v.join('、') : (v||'')); };
+  var line = function(k, w){ return '<span class="cf-l">'+F[k][1]+'：</span><span class="cf-u" style="'+(w?'min-width:'+w:'')+'">'+val(k)+'</span>'; };
+  var box = function(k){ var f=F[k], sel=data[k]||(f[2]==='checks'?[]:''); return '<span class="cf-l">'+f[1]+'：</span>'+f[3].map(function(o){ var on = f[2]==='checks'? sel.indexOf(o)>=0 : sel===o;
+      return '<span class="cf-c">'+(on?'☑':'□')+o+'</span>'; }).join(''); };
+  var rowsN = Math.max(6, contacts.length);
+  var ct = ''; for (var i=0;i<rowsN;i++){ var c=contacts[i]||{}; ct += '<tr><td>'+crfEsc(c['日期']||'')+'</td><td>'+crfEsc(c['內容']||'')+'</td></tr>'; }
+  return '<div class="crf">'+
+   '<div class="cf-top"><div class="cf-t">客戶需求表 <small>Customer Request Form</small></div><img class="cf-logo" src="'+BH_LOGO+'" alt="蜂宅 BEE HOME"></div>'+
+   '<div class="cf-sec"><div class="cf-h"><b>基 本 資 料</b><span>服務編號：<span class="cf-u" style="min-width:90px">'+crfEsc(meta.id||'')+'</span></span></div>'+
+   '<p class="cf-consent">'+(data['_同意']?'☑':'□')+' '+CRF.CONSENT+'</p>'+
+   '<div class="cf-g2"><div>'+line('姓名')+'</div><div>'+line('填表日期')+'</div><div>'+line('電話')+'</div><div>'+line('LINE')+'</div></div>'+
+   '<div class="cf-g1">'+line('地址')+'</div><div class="cf-g2"><div>'+line('建案名稱')+'</div><div>'+line('Email')+'</div><div>'+line('丈量時間')+'</div><div>'+line('規劃顧問')+'</div></div></div>'+
+   '<div class="cf-sec"><div class="cf-h c"><b>訪 談 紀 錄</b></div>'+
+   ['客戶來源','使用經驗'].map(function(k){return '<div class="cf-g1">'+box(k)+'</div>';}).join('')+
+   '<div class="cf-g1">'+box('屋況')+'　'+box('建物類型')+'</div>'+
+   '<div class="cf-g3"><div>'+line('坪數')+'</div><div>'+line('屋齡')+'</div><div>'+line('交屋時間')+'</div></div>'+
+   '<div class="cf-g1">'+box('規劃空間')+'</div><div class="cf-g1">'+box('喜好風格')+'</div><div class="cf-g1">'+line('風格說明')+'</div>'+
+   '<div class="cf-g2"><div>'+line('家庭人數')+'</div><div>'+line('家庭成員')+'</div></div>'+
+   '<div class="cf-g1">'+box('裝修工程')+'</div>'+
+   '<div class="cf-g3"><div>'+line('總預算')+'</div><div>'+line('預計完工')+'</div><div>'+line('入住時間')+'</div></div>'+
+   '<div class="cf-g1 cf-note">'+line('其他需求')+'</div></div>'+
+   '<div class="cf-sec"><div class="cf-h c"><b>聯 繫 紀 錄</b></div><table class="cf-tb"><tr><th style="width:22%">日　期</th><th>內　容</th></tr>'+ct+'</table></div>'+
+   '<div class="cf-foot">蜂宅室內裝修有限公司　｜　表單僅供裝修諮詢使用</div></div>';
+}
+var CRF_CSS = '.crf{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;width:190mm;margin:auto;color:#111;font-size:12.5px;background:#fff}'+
+ '.cf-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #ffd200;padding-bottom:4px;margin-bottom:6px}.cf-t{font-size:22px;font-weight:700;letter-spacing:2px}.cf-t small{font-size:13px;font-weight:400;color:#555;letter-spacing:0}.cf-logo{height:44px;display:block}'+
+ '.cf-sec{border:1.5px solid #222;margin-bottom:6px;padding:0 8px 6px}.cf-h{background:#ffd200;margin:0 -8px 6px;padding:3px 8px;display:flex;justify-content:space-between;border-bottom:1.5px solid #222}.cf-h.c{justify-content:center}.cf-h b{letter-spacing:4px}'+
+ '.cf-consent{margin:2px 0 4px;font-size:11.5px}.cf-g1,.cf-g2,.cf-g3{display:grid;gap:2px 14px;margin:5px 0;line-height:1.8}.cf-g2{grid-template-columns:1fr 1fr}.cf-g3{grid-template-columns:1fr 1fr 1fr}.cf-g2>div,.cf-g3>div,.cf-g1{display:flex;flex-wrap:wrap;align-items:baseline}'+
+ '.cf-l{white-space:nowrap;margin-right:2px}.cf-u{flex:1;border-bottom:1px solid #333;min-height:18px;padding:0 4px;color:#1a3fa0}.cf-c{margin-right:10px;white-space:nowrap}.cf-note .cf-u{min-height:36px}'+
+ '.cf-tb{width:100%;border-collapse:collapse}.cf-tb th,.cf-tb td{border:1px solid #333;height:22px;padding:2px 6px;font-size:12px;text-align:left;color:#1a3fa0}.cf-tb th{text-align:center;color:#111;background:#fdf3d0}.cf-foot{text-align:center;font-size:10.5px;color:#777}'+
+ '@media print{@page{size:A4 portrait;margin:9mm}.crf{width:auto}}';
+//node
+if (typeof module!=='undefined') module.exports={CRF:CRF,crfFields:crfFields,crfClean:crfClean,crfPrintHtml:crfPrintHtml,CRF_CSS:CRF_CSS};
+
+var D=null, S={view:'list',stage:'全部'};
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function money(n){return Math.round(bhNum(n)).toLocaleString('en-US')}
+function toast(m){var t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
+// ---- 連線 Apps Script API（fetch，POST text/plain 避免 CORS 預檢）----
+// 部署後的 Apps Script 網址；留空時在登入畫面貼上一次即可（存在這台裝置）
+var API_URL_DEFAULT='';
+var K_URL='bhCrmApiUrl',K_TOK='bhCrmToken';
+function apiUrl(){return API_URL_DEFAULT||localStorage.getItem(K_URL)||''}
+function post(body){var u=apiUrl();if(!u)return Promise.reject(new Error('尚未設定 Apps Script 網址'));
+  return fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'})
+    .then(function(r){if(!r.ok)throw new Error('連線失敗（HTTP '+r.status+'）');return r.text()})
+    .then(function(t){try{return JSON.parse(t)}catch(e){throw new Error('伺服器回應格式不對：請確認網址是 /exec 結尾，且部署時存取權選「任何人」')}})}
+function api(fn){var a=[].slice.call(arguments,1);
+  return post({action:'call',fn:fn,args:a,token:localStorage.getItem(K_TOK)||''}).then(function(j){
+    if(j.ok)return j.result;
+    if(j.error==='auth'){localStorage.removeItem(K_TOK);showLogin('登入已過期，請重新輸入密碼');var e=new Error('auth');e.auth=1;throw e}
+    throw new Error(j.error||'發生錯誤')}).catch(function(e){if(!e.auth)alert(e.message||e);throw e})}
+function showLogin(msg){$('#login').style.display='flex';$('#lgUrlRow').style.display=API_URL_DEFAULT?'none':'';
+  $('#lgUrl').value=apiUrl();$('#lgErr').textContent=msg||'';$('#lgPw').value='';setTimeout(function(){(apiUrl()?$('#lgPw'):$('#lgUrl')).focus()},50)}
+function doLogin(ev){ev.preventDefault();var u=$('#lgUrl').value.trim(),err=$('#lgErr');
+  if(!API_URL_DEFAULT){if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){err.textContent='網址要是 https://script.google.com/…/exec';return}localStorage.setItem(K_URL,u)}
+  err.textContent='登入中…';$('#lgBtn').disabled=true;
+  post({action:'login',password:$('#lgPw').value}).then(function(j){
+    if(!j.ok)throw new Error(j.error||'登入失敗');
+    localStorage.setItem(K_TOK,j.token);$('#login').style.display='none';$('#app').textContent='載入中…';return load()})
+  .catch(function(e){err.textContent=e.message||String(e)}).then(function(){$('#lgBtn').disabled=false})}
+function logout(){if(!confirm('登出這台裝置？'))return;localStorage.removeItem(K_TOK);D=null;$('#app').textContent='';showLogin('')}
+function boot(){$('#lgForm').onsubmit=doLogin;
+  if(apiUrl()&&localStorage.getItem(K_TOK))load().catch(function(e){if(!e.auth)$('#app').textContent='載入失敗：'+(e.message||e)});else showLogin('')}
+function load(){return api('getAll').then(function(d){D=d;render()})}
+document.querySelectorAll('header button[data-v]').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;render()}});
+function cust(id){return D.customers.filter(function(c){return c['客戶ID']===id})[0]||{}}
+function kase(id){return D.cases.filter(function(c){return c['案件ID']===id})[0]}
+function pays(id){return D.payments.filter(function(p){return p['案件ID']===id})}
+function unpaid(id){return pays(id).some(function(p){return bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today})}
+function render(){
+  document.querySelectorAll('header button[data-v]').forEach(function(b){b.className=b.dataset.v===S.view?'on':''});
+  ({list:vList,case:vCase,editor:vEditor,prices:vPrices,print:vPrint,sched:vSched,schedPrint:vSchedPrint,contract:vContract,ctEdit:vCtEdit,crf:vCrf,crfPrint:vCrfPrint})[S.view]();
+  window.scrollTo(0,0);
+}
+// ---- 案件列表 ----
+function vList(){
+  var st=['全部','待收款'].concat(BH.STAGES);
+  var cs=D.cases.filter(function(k){return S.stage==='全部'||(S.stage==='待收款'?unpaid(k['案件ID']):k['階段']===S.stage)})
+    .sort(function(a,b){return unpaid(b['案件ID'])-unpaid(a['案件ID'])||String(b['建立日期']).localeCompare(a['建立日期'])});
+  var pend=(D.crfs||[]).filter(function(r){return r['狀態']==='待處理'});
+  var h=pend.length?'<div class="card" id="pending" style="border-left:5px solid var(--r)"><b>📝 新的線上需求表（'+pend.length+'）</b>'+pend.map(function(r){return '<div class="row" style="margin-top:6px"><span style="margin-right:auto">'+esc(r['姓名'])+' <span class="muted">'+esc(r['電話'])+' ・ '+esc(r['建立時間'])+'</span></span><button class="s" onclick="openCrfId(\''+r['需求表ID']+'\',1)">查看</button><button class="p" onclick="convCrf(\''+r['需求表ID']+'\')">轉成客戶＋案件</button><button class="s" onclick="if(confirm(\'忽略這份需求表？\'))api(\'dismissCRF\',\''+r['需求表ID']+'\').then(load)">忽略</button></div>'}).join('')+'</div>':'';
+  h+='<div class="card chips">'+st.map(function(s){var n=s==='全部'?D.cases.length:s==='待收款'?D.cases.filter(function(k){return unpaid(k['案件ID'])}).length:D.cases.filter(function(k){return k['階段']===s}).length;
+    return '<button class="'+(S.stage===s?'on':'')+'" onclick="S.stage=\''+s+'\';render()">'+s+' '+n+'</button>'}).join('')+'</div>';
+  h+=cs.map(function(k){var c=cust(k['客戶ID']),u=unpaid(k['案件ID']);
+    return '<div class="card case'+(u?' unpaid':'')+'" onclick="S.caseId=\''+k['案件ID']+'\';S.view=\'case\';render()"><div><b>'+esc(c['姓名'])+'</b> <span class="muted">'+k['案件ID']+'</span><br><span class="muted">'+esc(siteAddr(k,c))+' ・ '+esc(k['坪數'])+'坪 ・ '+esc(k['負責人'])+'</span></div>'+
+    '<div style="text-align:right"><span class="tag">'+esc(k['階段'])+'</span>'+(u?'<br><span class="tag red">待收款</span>':'')+(k['合約總價']?'<br><span class="muted">$'+money(k['合約總價'])+'</span>':'')+'</div></div>'}).join('')||'<div class="card muted">沒有案件。按右上「＋客戶」開始。</div>';
+  h+='<div class="card"><b>客戶</b><div class="scroll"><table><tr><th>ID</th><th>姓名</th><th>電話</th><th class="hide-m">LINE</th><th class="hide-m">地址</th><th class="hide-m">來源</th><th></th></tr>'+
+    D.customers.map(function(c){return '<tr><td>'+c['客戶ID']+'</td><td>'+esc(c['姓名'])+'</td><td>'+esc(c['電話'])+'</td><td class="hide-m">'+esc(c['LINE'])+'</td><td class="hide-m">'+esc(c['地址'])+'</td><td class="hide-m">'+esc(c['來源'])+'</td><td><button class="s" onclick="editCustomer(\''+c['客戶ID']+'\')">編輯</button> <button class="s" onclick="newCase(\''+c['客戶ID']+'\')">＋案件</button></td></tr>'}).join('')+'</table></div></div>';
+  $('#app').innerHTML=h;
+}
+function form(title,fields,obj,onsave){
+  $('#app').innerHTML='<div class="card"><h3>'+title+'</h3><div class="grid">'+fields.map(function(f){var k=f[0],v=obj[k]==null?'':obj[k];
+    var inp=f[1]?'<select data-k="'+k+'">'+f[1].map(function(o){return '<option'+(o==v?' selected':'')+'>'+o+'</option>'}).join('')+'</select>':'<input data-k="'+k+'" value="'+esc(v)+'">';
+    return '<div><label>'+k+'</label>'+inp+'</div>'}).join('')+'</div><br><div class="row"><button class="p" id="sv">儲存</button><button class="s" onclick="render()">取消</button></div></div>';
+  $('#sv').onclick=function(){document.querySelectorAll('[data-k]').forEach(function(e){obj[e.dataset.k]=e.value});onsave(obj)};
+}
+// 施工地址：案件有填用案件的，否則用客戶地址
+function siteAddr(k,c){return (k&&k['地址'])||(c&&c['地址'])||''}
+var CF=[['姓名'],['電話'],['LINE'],['Email'],['地址'],['來源',['','官網','LINE','Threads','IG','FB','介紹','其他']],['備註']];
+function newCustomer(){form('新增客戶',CF,{},function(o){api('saveCustomer',o).then(function(c){toast('已新增 '+c['客戶ID']);return load().then(function(){newCase(c['客戶ID'])})})})}
+function editCustomer(id){form('編輯客戶 '+id,CF,Object.assign({},cust(id)),function(o){api('saveCustomer',o).then(function(){toast('已儲存');load()})})}
+var KF=[['案名'],['地址'],['坪數'],['屋況',['','新成屋','預售屋','中古屋','老屋翻新','商空']],['風格'],['階段',BH.STAGES],['負責人'],['合約總價']];
+function newCase(cid){S.view='list';form('新增案件（'+esc(cust(cid)['姓名'])+'）',KF,{'客戶ID':cid,'地址':cust(cid)['地址']||''},function(o){api('saveCase',o).then(function(k){toast('已新增 '+k['案件ID']);S.caseId=k['案件ID'];S.view='case';load()})})}
+// ---- 案件頁 ----
+function vCase(){
+  var k=kase(S.caseId),c=cust(k['客戶ID']);
+  var qs=D.quotes.filter(function(q){return q['案件ID']===k['案件ID']}).sort(function(a,b){return b['版本']-a['版本']});
+  var h='<div class="card"><div class="row"><h3 style="margin:0;margin-right:auto">'+esc(c['姓名'])+' <span class="muted">'+k['案件ID']+'</span></h3><button class="s" onclick="editCase()">編輯案件</button></div>'+
+    '<p class="muted">📞 '+esc(c['電話'])+' ・ LINE '+esc(c['LINE'])+' ・ '+esc(c['Email'])+(c['地址']?' ・ 🏠 '+esc(c['地址']):'')+'</p><div class="grid">'+
+    [['案名'],['地址'],['坪數'],['屋況'],['風格'],['負責人']].map(function(f){return '<div><label>'+(f[0]==='地址'?'施工地址':f[0])+'</label>'+esc(f[0]==='地址'?siteAddr(k,c):k[f[0]])+'</div>'}).join('')+
+    '<div><label>合約總價</label>$'+money(k['合約總價'])+'</div></div><br><label>階段</label><div class="chips">'+BH.STAGES.map(function(s){return '<button class="'+(k['階段']===s?'on':'')+'" onclick="setStage(\''+s+'\')">'+s+'</button>'}).join('')+'</div></div>';
+  h+='<div class="card"><div class="row"><b style="margin-right:auto">報價版本</b><button class="p" onclick="openEditor()">＋新報價</button></div><div class="scroll"><table><tr><th>版本</th><th>日期</th><th class="num">總價</th><th class="num">毛利率</th><th>狀態</th><th class="hide-m">變更說明</th><th></th></tr>'+
+    qs.map(function(q){return '<tr><td>V'+q['版本']+'</td><td>'+q['日期']+'</td><td class="num">'+money(q['總價'])+'</td><td class="num">'+(q['成本']?q['毛利率%']+'%':'<span class="muted">缺成本</span>')+'</td><td><select onchange="qStatus(\''+q['報價ID']+'\',this.value)">'+['草稿','已送出','已簽約','作廢'].map(function(s){return '<option'+(s===q['狀態']?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td class="hide-m">'+esc(q['變更說明'])+'</td><td style="white-space:nowrap"><button class="s" onclick="openEditor(\''+q['報價ID']+'\')">複製修改</button> <button class="s" onclick="openPrint(\''+q['報價ID']+'\')">報價單</button></td></tr>'}).join('')+'</table></div>'+(qs.length?'':'<p class="muted">還沒有報價。</p>')+'</div>';
+  var ps=pays(k['案件ID']);
+  h+='<div class="card"><div class="row"><b style="margin-right:auto">收款（訂金10/開工40/木作結束40/驗收10）</b>'+(ps.length?'':'<button class="p" onclick="mkPay()">建立收款期別</button>')+'</div><div class="scroll"><table><tr><th>期別</th><th class="num">應收</th><th>應收日期</th><th class="num">已收</th><th>收款日</th><th class="num">餘額</th><th></th></tr>'+
+    ps.map(function(p,i){var late=bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today;
+      return '<tr style="'+(late?'color:var(--r);font-weight:600':'')+'"><td>'+p['期別']+' '+p['比例%']+'%</td><td class="num">'+money(p['應收金額'])+'</td><td><input type="date" id="pd'+i+'" value="'+esc(p['應收日期'])+'"></td><td><input id="pr'+i+'" value="'+bhNum(p['已收金額'])+'" style="width:100px"></td><td><input type="date" id="pp'+i+'" value="'+esc(p['收款日'])+'"></td><td class="num">'+money(p['餘額'])+'</td><td><button class="s" onclick="savePay('+i+')">存</button></td></tr>'}).join('')+'</table></div><p class="muted">有應收日期、到期且未收清的期別會標紅；每天 9 點自動寄提醒給老闆（含 3 天內到期）。</p></div>';
+  var ss=scheds(k['案件ID']);
+  h+='<div class="card"><div class="row"><b style="margin-right:auto">工期表・合約</b><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
+    ss.map(function(x){return '<tr><td>S'+x['版本']+'</td><td>'+esc(x['報價ID'])+'</td><td>'+x['開工日']+'</td><td>'+x['完工日']+'</td><td class="num">'+x['工作天數']+'</td><td style="white-space:nowrap"><button class="s" onclick="openSched(\''+x['工期ID']+'\')">複製修改</button> <button class="s" onclick="openSchedPrint(\''+x['工期ID']+'\')">工期表</button></td></tr>'}).join('')+'</table></div>'+
+    (ss.length?'':'<p class="muted">還沒有工期表。會用「已簽約」的報價（沒有的話用最新版）產生。</p>')+'<p class="muted">合約會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p></div>';
+  $('#app').innerHTML=h;
+}
+function editCase(){var k=Object.assign({},kase(S.caseId));form('編輯案件 '+k['案件ID'],KF,k,function(o){api('saveCase',o).then(function(){toast('已儲存');S.view='case';load()})})}
+function setStage(s){var k=Object.assign({},kase(S.caseId));k['階段']=s;api('saveCase',k).then(load)}
+function qStatus(id,s){api('setQuoteStatus',id,s).then(function(){toast('狀態已更新');load()})}
+function mkPay(){api('createPayments',S.caseId).then(function(){toast('已建立 4 期');load()})}
+function savePay(i){var p=pays(S.caseId)[i];api('savePayment',S.caseId,p['期別'],{'應收日期':$('#pd'+i).value,'已收金額':$('#pr'+i).value,'收款日':$('#pp'+i).value}).then(function(){toast('已儲存');load()})}
+// ---- 報價編輯器 ----
+function openEditor(fromId){
+  S.lines=[];S.fromId=fromId||'';
+  if(!fromId){S.view='editor';render();return}
+  api('getQuoteLines',fromId).then(function(ls){S.lines=ls.map(function(l){var sz=String(l['尺寸cm']).replace('cm','').split('×');
+    return {cat:l['工程類別'],item:l['項目'],w:sz[0]||'',h:sz[1]||'',qty:l['換算數量'],unit:l['單位'],cost:l['成本價'],price:l['報價單價'],sup:l['廠商'],note:l['備註']}});S.view='editor';render()});
+}
+function vEditor(){
+  var k=kase(S.caseId);
+  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 新報價'+(S.fromId?'（從 '+S.fromId+' 複製）':'')+'</b><p class="muted">輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算（1尺=30.3cm、1才=30.3×30.3cm、1坪=33,058cm²）；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
+  BH.CATEGORIES.map(function(c,ci){return '<datalist id="items'+ci+'">'+D.prices.filter(function(p){return p['工程類別']===c}).map(function(p){return '<option value="'+esc(p['項目'])+'">$'+p['報價單價']+'/'+p['單位']+'</option>'}).join('')+'</datalist>'}).join('')+
+  '<div class="scroll"><table class="ed"><tr><th>工程類別</th><th>項目</th><th>寬cm</th><th>高/深cm</th><th>數量</th><th>單位</th><th>成本價</th><th>報價單價</th><th class="num">小計</th><th>廠商</th><th>備註</th><th></th></tr><tbody id="lines"></tbody></table></div>'+
+  '<br><div class="row"><button class="s" onclick="addLine()">＋加一列</button></div></div>'+
+  '<div class="card"><div class="grid"><div><label>變更說明（存成新版本）</label><input id="qnote" placeholder="例：客戶刪除吧檯，改系統櫃"></div><div><label>狀態</label><select id="qst"><option>草稿</option><option>已送出</option></select></div></div><br><div class="row"><button class="p" onclick="saveQ()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div></div>'+
+  '<div class="sum" id="sum"></div>';
+  $('#app').innerHTML=h; if(!S.lines.length) addLine(); else drawLines();
+}
+function addLine(){S.lines.push({cat:BH.CATEGORIES[0],item:'',w:'',h:'',qty:'',unit:'',cost:'',price:'',sup:'',note:''});drawLines()}
+function drawLines(){
+  $('#lines').innerHTML=S.lines.map(function(l,i){
+    var auto=bhConvert(l.unit,l.w,l.h)!==null;
+    return '<tr><td><select onchange="upd('+i+',\'cat\',this.value)">'+BH.CATEGORIES.map(function(c){return '<option'+(c===l.cat?' selected':'')+'>'+c+'</option>'}).join('')+'</select></td>'+
+    '<td><input list="items'+BH.CATEGORIES.indexOf(l.cat)+'" style="min-width:150px" value="'+esc(l.item)+'" onchange="pick('+i+',this.value)"></td>'+
+    ['w','h'].map(function(f){return '<td><input inputmode="decimal" style="width:70px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
+    '<td><input inputmode="decimal" id="q'+i+'" style="width:70px'+(auto&&l.w?';background:#fffbe6':'')+'" value="'+esc(l.qty)+'" oninput="upd('+i+',\'qty\',this.value,1)"></td>'+
+    '<td><input style="width:50px" value="'+esc(l.unit)+'" onchange="upd('+i+',\'unit\',this.value)"></td>'+
+    ['cost','price'].map(function(f){return '<td><input inputmode="decimal" style="width:80px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
+    '<td class="num" id="s'+i+'">'+money(bhNum(l.qty)*bhNum(l.price))+'</td>'+
+    '<td><input style="width:80px" value="'+esc(l.sup)+'" onchange="upd('+i+',\'sup\',this.value)"></td><td><input style="width:100px" value="'+esc(l.note)+'" onchange="upd('+i+',\'note\',this.value)"></td>'+
+    '<td><button class="s" onclick="S.lines.splice('+i+',1);drawLines()">✕</button></td></tr>'}).join('');
+  sum();
+}
+function pick(i,name){var l=S.lines[i];l.item=name;var p=D.prices.filter(function(p){return p['項目']===name})[0];
+  if(p){l.cat=p['工程類別'];l.unit=p['單位'];l.price=p['報價單價'];l.cost=p['成本價'];if(p['價格來源']==='網路行情待確認')toast('⚠ 此項為網路行情，待確認');}
+  var c=bhConvert(l.unit,l.w,l.h);if(c!==null&&l.w)l.qty=c;drawLines()}
+function upd(i,f,v,live){var l=S.lines[i];l[f]=v;
+  if(f==='cat'&&l.item&&!D.prices.some(function(p){return p['項目']===l.item&&p['工程類別']===v})){l.item='';l.unit='';l.price='';l.cost='';}
+  if(f==='w'||f==='h'||f==='unit'){var c=bhConvert(l.unit,l.w,l.h);if(c!==null&&l.w){l.qty=c;var q=$('#q'+i);if(q)q.value=c}}
+  if(live){$('#s'+i).textContent=money(bhNum(l.qty)*bhNum(l.price));sum()}else drawLines()}
+function calc(){return bhCalcQuote(S.lines.filter(function(l){return l.item}).map(function(l){return{category:l.cat,qty:l.qty,cost:l.cost,price:l.price}}),bhNum(D.settings['設計監工費率']||0.05))}
+function sum(){var c=calc();$('#sum').innerHTML='<span>工程小計 <b>'+money(c.subtotal)+'</b></span><span>設計監工 <b>'+money(c.fee)+'</b></span><span>總計 <b>'+money(c.total)+'</b></span><span>成本 <b>'+money(c.cost)+'</b></span><span>毛利 <b class="'+(c.margin<0?'bad':'')+'">'+money(c.margin)+'（'+c.marginPct+'%）</b></span>'+(c.missingCost?'<span class="bad">'+c.missingCost+' 項缺成本價</span>':'')}
+function saveQ(){var ls=S.lines.filter(function(l){return l.item});if(!ls.length)return alert('至少要一個項目');
+  api('saveQuote',S.caseId,ls.map(function(l){return{'工程類別':l.cat,'項目':l.item,'尺寸cm':bhSizeLabel(l.w,l.h),'換算數量':bhNum(l.qty),'單位':l.unit,'成本價':l.cost,'報價單價':bhNum(l.price),'廠商':l.sup,'備註':l.note}}),$('#qnote').value,$('#qst').value)
+  .then(function(r){toast('已存成 '+r.quoteId);S.view='case';load()})}
+// ---- 單價庫 ----
+function vPrices(){
+  var f=S.pf||'';
+  var h='<div class="card"><div class="row"><b style="margin-right:auto">項目單價庫（'+D.prices.length+' 項）</b><input placeholder="搜尋" style="max-width:200px" value="'+esc(f)+'" oninput="S.pf=this.value;vPrices();var e=document.querySelector(\'[placeholder=搜尋]\');e.focus();e.setSelectionRange(99,99)"><button class="p" onclick="editPrice()">＋新增項目</button></div><p class="muted">黃底＝網路行情待確認。成本價請老闆補上，報價才算得出毛利。</p><div class="scroll"><table><tr><th>工程類別</th><th>項目</th><th>單位</th><th class="num">成本價</th><th class="num">報價單價</th><th class="hide-m">價格來源</th><th class="hide-m">量測依據</th><th></th></tr>'+
+  D.prices.filter(function(p){return !f||(p['項目']+p['工程類別']).indexOf(f)>=0}).map(function(p){return '<tr class="'+(p['價格來源']==='網路行情待確認'?'web':'')+'"><td>'+esc(p['工程類別'])+'</td><td>'+esc(p['項目'])+'</td><td>'+esc(p['單位'])+'</td><td class="num">'+(p['成本價']===''?'<span class="muted">—</span>':money(p['成本價']))+'</td><td class="num">'+money(p['報價單價'])+'</td><td class="hide-m">'+esc(p['價格來源'])+'</td><td class="hide-m muted">'+esc(p['量測依據'])+'</td><td><button class="s" onclick="editPrice(\''+p['項目ID']+'\')">編輯</button></td></tr>'}).join('')+'</table></div></div>';
+  $('#app').innerHTML=h;
+}
+function editPrice(id){var p=Object.assign({},D.prices.filter(function(x){return x['項目ID']===id})[0]||{});
+  form(id?'編輯 '+id:'新增項目',[['工程類別',BH.CATEGORIES],['項目'],['單位',['式','尺','坪','才','個','組','口','開','迴','處','支','盞','樘','車','m','m²']],['成本價'],['報價單價'],['價格來源',['自訂','過往報價','廠商報價','網路行情待確認']],['量測依據'],['備註']],p,
+  function(o){api('savePrice',o).then(function(){toast('已儲存');S.view='prices';load()})});
+  if(id){var b=document.createElement('button');b.className='s';b.textContent='刪除';b.style.color='var(--r)';b.onclick=function(){if(confirm('刪除此項目？'))api('deletePrice',id).then(function(){S.view='prices';load()})};$('#sv').parentNode.appendChild(b)}}
+// ---- 客戶版報價單（不含成本、毛利）----
+function openPrint(qid){api('getQuoteLines',qid).then(function(ls){S.pl=ls;S.qid=qid;S.view='print';render()})}
+function vPrint(){
+  var q=D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,rate=bhNum(st['設計監工費率']||0.05);
+  var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
+  var cats=BH.CATEGORIES.filter(function(x){return r.byCat[x]}),pay=bhPaySchedule(r.total);
+  var h='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div><div class="pq">'+
+  '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' 工程預算總表</h2><div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
+  '<table><tr><th>項次</th><th>品名</th><th>單位</th><th>數量</th><th class="num">總價</th><th>備註</th></tr>'+
+  cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
+  '<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+Math.round(rate*100)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>'+
+  '<tr><th colspan="4">工程總計（不含稅）</th><th class="num">'+money(r.total)+'</th><th></th></tr></table>'+
+  (st['匯款帳戶']&&st['匯款帳戶'].indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(st['匯款帳戶'])+'</p>':'')+
+  '<p>1. 以上報價含施工運費未稅（含稅另計），未述之項目列入追加另計。<br>2. 本報價單經雙方同意簽約後，付款方式日程如下：<br>'+pay.map(function(p){return '　'+p.name+' '+p.pct+'%　NT$'+money(p.amount)}).join('<br>')+'<br>3. 貨款未付清前屬'+esc(st['廠商署名'])+'所有。<br>4. 簽約生效後，工程限於六個月內執行，有效期後開工須重新報價。<br>※ 此報價有效期限　　年　　月　　日。</p>'+
+  '<div class="hd" style="margin-top:30px"><div>客戶簽名：＿＿＿＿＿＿</div><div>廠商：'+esc(st['廠商署名'])+'</div></div>'+
+  '<div class="pb"></div><h3>工程明細</h3>'+cats.map(function(x){return '<h4>'+x+'</h4><table><tr><th>項目</th><th>尺寸</th><th class="num">數量</th><th>單位</th><th class="num">單價</th><th class="num">小計</th><th>備註</th></tr>'+
+    S.pl.filter(function(l){return l['工程類別']===x}).map(function(l){return '<tr><td>'+esc(l['項目'])+'</td><td>'+esc(l['尺寸cm'])+'</td><td class="num">'+l['換算數量']+'</td><td>'+esc(l['單位'])+'</td><td class="num">'+money(l['報價單價'])+'</td><td class="num">'+money(l['小計'])+'</td><td>'+esc(l['備註'])+'</td></tr>'}).join('')+'</table>'}).join('')+'</div>';
+  $('#app').innerHTML=h;
+}
+// ---- 工期表 ----
+function scheds(id){return (D.schedules||[]).filter(function(s){return s['案件ID']===id}).sort(function(a,b){return b['版本']-a['版本']})}
+function caseQuotes(id){return D.quotes.filter(function(q){return q['案件ID']===id}).sort(function(a,b){return b['版本']-a['版本']})}
+function pickQuote(id){var qs=caseQuotes(id);return qs.filter(function(q){return q['狀態']==='已簽約'})[0]||qs.filter(function(q){return q['狀態']!=='作廢'})[0]}
+function durMap(){var m={};(D.durations||[]).forEach(function(r){m[r['工程類別']]=bhNum(r['預設天數'])});return m}
+function skipDay(){return D.settings['工期休息日']||'六日'}
+function openSched(fromId){
+  var k=kase(S.caseId);S.sv={start:'',note:'',rows:[],qid:''};
+  if(fromId){var s0=(D.schedules||[]).filter(function(x){return x['工期ID']===fromId})[0];
+    return api('getScheduleRows',fromId).then(function(rs){S.sv={start:s0['開工日'],qid:s0['報價ID'],from:fromId,note:'',rows:rs.map(function(r){return{cat:r['工程類別'],days:r['天數'],par:r['與上項同時']==='是',note:r['備註']}})};S.view='sched';render()})}
+  var q=pickQuote(k['案件ID']);if(!q)return alert('請先建立報價');
+  api('getQuoteLines',q['報價ID']).then(function(ls){var cats=[];ls.forEach(function(l){if(cats.indexOf(l['工程類別'])<0)cats.push(l['工程類別'])});
+    S.sv={start:bhNextWork(D.today,skipDay(),D.holidays),qid:q['報價ID'],note:'',rows:bhScheduleRowsFromCats(cats,durMap())};S.view='sched';render()})}
+function schedCalc(){return bhSchedule(S.sv.rows,S.sv.start,skipDay(),D.holidays)}
+function vSched(){var k=kase(S.caseId),qs=caseQuotes(k['案件ID']);
+  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 工期表'+(S.sv.from?'（從 '+S.sv.from+' 複製）':'')+'</b><p class="muted">工種來自報價，天數是「工期預設」分頁的預設值，可直接改。休息日：'+(skipDay()==='六日'?'週六、日':skipDay()==='日'?'週日':'不休')+'＋「假日」分頁的國定假日。勾「同時」表示與上一項同一天開工。</p>'+
+  '<div class="grid"><div><label>開工日</label><input type="date" id="sStart" value="'+esc(S.sv.start)+'" onchange="S.sv.start=this.value;drawSched()"></div><div><label>依據報價</label><select onchange="S.sv.qid=this.value">'+qs.map(function(q){return '<option'+(q['報價ID']===S.sv.qid?' selected':'')+'>'+q['報價ID']+'</option>'}).join('')+'</select></div><div><label>備註（存成新版本）</label><input id="sNote" placeholder="例：木作延後一週"></div></div></div>'+
+  '<div class="card"><div class="scroll"><table class="ed"><tr><th>#</th><th>工程類別</th><th>天數</th><th>同時</th><th>開始</th><th>結束</th><th>備註</th><th></th></tr><tbody id="srows"></tbody></table></div><br><div class="row"><select id="sAdd">'+BH.CATEGORIES.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select><button class="s" onclick="S.sv.rows.push({cat:$(\'#sAdd\').value,days:durMap()[$(\'#sAdd\').value]||BH.DURATIONS[$(\'#sAdd\').value]||3});drawSched()">＋加工項</button></div></div>'+
+  '<div class="sum" id="ssum"></div><br><div class="card row"><button class="p" onclick="saveSched()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div>';
+  $('#app').innerHTML=h;drawSched()}
+function drawSched(){var r=schedCalc();
+  $('#srows').innerHTML=r.rows.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td><input style="min-width:110px" value="'+esc(x.cat)+'" onchange="S.sv.rows['+i+'].cat=this.value"></td><td><input inputmode="numeric" style="width:60px" value="'+x.days+'" onchange="S.sv.rows['+i+'].days=this.value;drawSched()"></td><td><input type="checkbox" style="width:auto"'+(x.par?' checked':'')+(i?'':' disabled')+' onchange="S.sv.rows['+i+'].par=this.checked;drawSched()"></td><td>'+x.start.slice(5)+'</td><td>'+x.end.slice(5)+'</td><td><input style="width:110px" value="'+esc(x.note)+'" onchange="S.sv.rows['+i+'].note=this.value"></td><td style="white-space:nowrap"><button class="s" onclick="mvS('+i+',-1)">↑</button><button class="s" onclick="mvS('+i+',1)">↓</button><button class="s" onclick="S.sv.rows.splice('+i+',1);drawSched()">✕</button></td></tr>'}).join('');
+  $('#ssum').innerHTML='<span>開工 <b>'+r.start+'</b></span><span>完工 <b>'+r.end+'</b></span><span>工作天 <b>'+r.workDays+'</b></span><span>日曆天 <b>'+r.calendarDays+'</b></span>'}
+function mvS(i,d){var a=S.sv.rows,j=i+d;if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;drawSched()}
+function saveSched(){if(!S.sv.rows.length)return alert('至少要一個工項');if(!S.sv.start)return alert('請填開工日');
+  api('saveSchedule',S.caseId,S.sv.qid,S.sv.start,S.sv.rows.map(function(r){return{'工程類別':r.cat,'天數':bhNum(r.days),'與上項同時':!!r.par,'備註':r.note||''}}),$('#sNote').value)
+  .then(function(r){toast('已存成 '+r.scheduleId);return load().then(function(){openSchedPrint(r.scheduleId)})})}
+function openSchedPrint(sid){api('getScheduleRows',sid).then(function(rs){S.sr=rs;S.sid=sid;S.view='schedPrint';render()})}
+function caseName(k,c){return k['案名']||((c['姓名']||'').slice(0,1)?(c['姓名'].slice(0,1)+'公館'):'')}
+// 工期進度表：依過往格式，一個月一頁，固定工種列，施工日畫 ●，週末與國定假日整欄紅底
+function vSchedPrint(){var s=(D.schedules||[]).filter(function(x){return x['工期ID']===S.sid})[0],k=kase(s['案件ID']),c=cust(k['客戶ID']),st=D.settings,wk='日一二三四五六';
+  var rowsN=BH.SCHED_ROWS.slice();S.sr.forEach(function(r){if(rowsN.indexOf(r['工程類別'])<0)rowsN.splice(rowsN.indexOf('清潔工程'),0,r['工程類別'])});
+  var months=[],d=bhD(s['開工日']);d.setUTCDate(1);while(bhDs(d)<=s['完工日']){months.push(bhDs(d).slice(0,7));d.setUTCMonth(d.getUTCMonth()+1)}
+  var wcount={},n=0,dd=bhD(s['開工日']);while(bhDs(dd)<=s['完工日']){var x=bhDs(dd);if(bhIsWork(x,skipDay(),D.holidays))wcount[x]=++n;dd.setUTCDate(dd.getUTCDate()+1)}
+  var h='<div class="noprint row" style="max-width:1100px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF（A4 橫向，一月一頁）</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>';
+  h+=months.map(function(m,pi){var y=+m.slice(0,4),mo=+m.slice(5),nd=new Date(Date.UTC(y,mo,0)).getUTCDate(),days=[];for(var i=1;i<=nd;i++)days.push(m+'-'+(i<10?'0':'')+i);
+    var off=function(x){return !bhIsWork(x,skipDay(),D.holidays)},cell=function(x,inner){return '<td class="dc'+(off(x)?' off':'')+'">'+(inner||'')+'</td>'};
+    var pad='';for(var j=nd;j<31;j++)pad+='<td class="dc"></td>';
+    return '<div class="gsw"><div class="pq gs'+(pi?' pb':'')+'"><img class="plogo" src="'+BH_LOGO+'" style="height:34px;margin-bottom:0;float:right"><div class="gt">'+esc(caseName(k,c))+'</div><div class="gsub"><span></span><b>工期進度表</b><span>本頁數 / 總頁數：'+(pi+1)+' / '+months.length+'</span></div>'+
+    '<table class="gantt ghd"><tr><td>客戶編號：'+esc(c['客戶ID'])+'</td><td>客戶名稱：'+esc(c['姓名'])+'</td></tr><tr><td>訂單編號：'+esc(s['報價ID'])+'</td><td>工程承攬方：'+esc(st['廠商署名'])+'</td></tr><tr><td>工程地址 / 屋主車位：'+esc(siteAddr(k,c))+'</td><td>建表日期：'+s['日期']+'</td></tr></table>'+
+    '<table class="gantt"><tr><th class="gn">工作天數</th>'+days.map(function(x){return cell(x,wcount[x]||'')}).join('')+pad+'</tr>'+
+    '<tr><th class="gn">月</th>'+days.map(function(x){return cell(x,mo)}).join('')+pad+'</tr><tr><th class="gn">日</th>'+days.map(function(x){return cell(x,+x.slice(8))}).join('')+pad+'</tr>'+
+    '<tr><th class="gn">星期</th>'+days.map(function(x){return cell(x,wk[bhD(x).getUTCDay()])}).join('')+pad+'</tr>'+
+    rowsN.map(function(name){var rs=S.sr.filter(function(r){return r['工程類別']===name});
+      return '<tr><th class="gn">'+esc(name)+'</th>'+days.map(function(x){var on=rs.some(function(r){return x>=r['開始']&&x<=r['結束']})&&!off(x);
+        var note=rs.filter(function(r){return r['備註']&&r['開始']===x}).map(function(r){return r['備註']})[0];
+        return cell(x,(on?'●':'')+(note?'<span class="gnote">'+esc(note)+'</span>':''))}).join('')+pad+'</tr>'}).join('')+
+    '</table><table class="gantt gft"><tr><td rowspan="2" style="width:50%"></td><td>客戶簽名/日期：</td></tr><tr><td>廠商/日期：</td></tr></table></div></div>'}).join('');
+  $('#app').innerHTML=h}
+// ---- 合約 ----
+function openContract(){var k=kase(S.caseId),ss=scheds(k['案件ID']),s=ss[0];
+  if(s) return api('getScheduleRows',s['工期ID']).then(function(){S.view='contract';render()});S.view='contract';render()}
+BH.PAY_NODES={'開工':'保護工程完成','木作結束':'木工工程完成','驗收':'完工清潔'};
+function contractMap(){var k=kase(S.caseId),c=cust(k['客戶ID']),st=D.settings,s=scheds(k['案件ID'])[0]||{},q=pickQuote(k['案件ID'])||{};
+  var total=bhNum(k['合約總價'])||bhNum(q['總價']),ps=pays(k['案件ID']),cn='一二三四五六七八九十';
+  var pl=(ps.length?ps.map(function(p){return {name:p['期別'],pct:p['比例%'],amount:p['應收金額']}}):(total?bhPaySchedule(total):[]));
+  return {'案名':caseName(k,c),'甲方姓名':c['姓名'],'甲方電話':c['電話'],'甲方地址':(S.ctOv&&S.ctOv.c===S.caseId&&S.ctOv['甲方地址']!=null)?S.ctOv['甲方地址']:(c['地址']||k['地址']||''),'乙方名稱':st['合約公司名稱']||st['公司名稱'],'乙方負責人':st['公司負責人']||st['廠商署名'],'乙方統編':st['公司統編'],'乙方地址':st['公司地址'],'乙方電話':st['公司電話'],'乙方登記證號':st['登記證書字號'],
+    '工程地點':(S.ctOv&&S.ctOv.c===S.caseId&&S.ctOv['工程地點']!=null)?S.ctOv['工程地點']:siteAddr(k,c),'案件編號':k['案件ID'],'報價編號':q['報價ID'],'合約總價數字':total?String(Math.round(total)):'','合約總價':total?money(total):'','合約總價大寫':total?bhChineseMoney(total):'',
+    '付款表':pl.length?pl.map(function(p,i){var amt=Math.round(bhNum(p.amount));return cn[i]+'、'+(i===0?'本契約簽訂日，甲方支付工程總價'+p.pct+'%簽約金計'+amt+'元。':'依附件進行至節點'+(i+1)+'：'+(BH.PAY_NODES[p.name]||p.name)+'時，甲方'+(i===pl.length-1?'應':'')+'支付工程總價'+p.pct+'%計'+amt+'元。')}).join('\n'):'',
+    '開工日':s['開工日'],'完工日':s['完工日'],'開工日民國':s['開工日']?bhRoc(s['開工日']):'','完工日民國':s['完工日']?bhRoc(s['完工日']):'','工作天數':s['工作天數'],'工期編號':s['工期ID'],'代辦費用':'','規費預付日數':''}}
+function vContract(){var m=contractMap(),miss=Object.keys(m).filter(function(x){return (m[x]===''||m[x]==null)&&['代辦費用','規費預付日數','乙方登記證號'].indexOf(x)<0}),F=function(t){return esc(bhFill(t,m))};
+  var h='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'ctEdit\';render()">編輯合約範本</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div>'+
+  '<div class="card noprint row" style="max-width:800px;margin:0 auto 10px"><label>甲方地址</label><input id="ovA" style="flex:1" value="'+esc(m['甲方地址'])+'"><label>工程地點</label><input id="ovS" style="flex:1" value="'+esc(m['工程地點'])+'"><button class="s" onclick="S.ctOv={c:S.caseId,\'甲方地址\':$(\'#ovA\').value,\'工程地點\':$(\'#ovS\').value};render()">套用（只改這份）</button></div>'+(miss.length?'<div class="card noprint muted" style="max-width:800px;margin:0 auto 10px">⚠ 以下資料空白，會印成底線讓你手寫：'+miss.join('、')+'</div>':'')+
+  '<div class="pq ct"><img class="plogo" src="'+BH_LOGO+'"><h2>建築物室內裝修—'+F('{{案名}}')+'工程承攬契約書</h2>'+
+  '<p>立契約書人──消費者：'+F('{{甲方姓名}}')+'　（以下簡稱甲方）<br>業者：'+F('{{乙方負責人}}')+'　（以下簡稱乙方）<br>乙方登記證書字號或專業證照字號：'+F('{{乙方登記證號}}')+'<br>茲因甲方委託乙方辦理室內裝修工程，經雙方同意訂立本契約，約定條款如下：</p>'+
+  D.contract.map(function(c){return '<p class="art"><b>'+F(c['標題'])+'</b>'+(c['內容']?'<br>'+F(c['內容']).replace(/\n/g,'<br>'):'')+'</p>'}).join('')+
+  '<div class="sig"><p><b>立委任契約書人</b></p><p>甲　　方：'+F('{{甲方姓名}}')+'<br>負 責 人：<br>統一編號或國民身分證統一編號：<br>地　　址：'+F('{{甲方地址}}')+'<br>電　　話：'+F('{{甲方電話}}')+'</p>'+
+  '<p>乙　　方：'+F('{{乙方名稱}}')+'<br>負 責 人：'+F('{{乙方負責人}}')+'<br>統一編號：'+F('{{乙方統編}}')+'<br>地　　址：'+F('{{乙方地址}}')+'<br>電　　話：'+F('{{乙方電話}}')+'</p></div>'+
+  '<p style="text-align:center;letter-spacing:4px;margin-top:24px">中華民國　　　　年　　　　月　　　　日</p><p class="muted" style="font-size:12px">附件：估價單（'+F('{{報價編號}}')+'）、工程施工進度表（'+F('{{工期編號}}')+'）、設計施工圖說</p></div>';
+  $('#app').innerHTML=h}
+function vCtEdit(){var keys=Object.keys(contractMap());
+  var h='<div class="card"><b>合約範本</b><p class="muted">直接改條款文字。可用的自動欄位：'+keys.map(function(x){return '{{'+x+'}}'}).join(' ')+'</p><div id="cts">'+
+  D.contract.map(function(c,i){return '<div class="ctb"><input data-t="'+i+'" value="'+esc(c['標題'])+'"><textarea data-c="'+i+'" rows="4">'+esc(c['內容'])+'</textarea><button class="s" onclick="D.contract.splice('+i+',1);vCtEdit()">刪除此條</button></div>'}).join('')+
+  '</div><br><div class="row"><button class="s" onclick="ctSync();D.contract.push({\'標題\':\'新條款\',\'內容\':\'\'});vCtEdit()">＋加條款</button><button class="p" onclick="ctSync();api(\'saveContractTemplate\',D.contract).then(function(){toast(\'範本已儲存\');S.view=\'contract\';load()})">儲存範本</button><button class="s" onclick="S.view=\'contract\';load()">取消</button></div></div>';
+  $('#app').innerHTML=h}
+function ctSync(){document.querySelectorAll('[data-t]').forEach(function(e){D.contract[+e.dataset.t]['標題']=e.value});document.querySelectorAll('[data-c]').forEach(function(e){D.contract[+e.dataset.c]['內容']=e.value})}
+// ---- 客戶需求表 ----
+function openCrf(){var c=(D.crfs||[]).filter(function(r){return r['案件ID']===S.caseId})[0];
+  if(c)return openCrfId(c['需求表ID']);var k=kase(S.caseId),cu=cust(k['客戶ID']);
+  S.crf={row:{'客戶ID':k['客戶ID'],'案件ID':k['案件ID']},data:{'姓名':cu['姓名'],'電話':cu['電話'],'LINE':cu['LINE'],'Email':cu['Email'],'地址':siteAddr(k,cu),'坪數':k['坪數'],'建案名稱':k['案名'],'規劃顧問':k['負責人'],'填表日期':D.today},contacts:[]};S.view='crf';render()}
+function openCrfId(id,ro){api('getCRF',id).then(function(r){S.crf=r;S.crfRO=!!ro;S.view=ro?'crfPrint':'crf';render()})}
+function crfInput(f,v){var k=f[0];if(f[2]==='checks'||f[2]==='radio'){v=v||(f[2]==='checks'?[]:'');return '<div class="opts">'+f[3].map(function(o){var on=f[2]==='checks'?v.indexOf(o)>=0:v===o;return '<label><input type="'+(f[2]==='checks'?'checkbox':'radio')+'" name="cf_'+k+'" value="'+esc(o)+'"'+(on?' checked':'')+'>'+esc(o)+'</label>'}).join('')+'</div>'}
+  if(f[2]==='textarea')return '<textarea data-cf="'+k+'" rows="3">'+esc(v)+'</textarea>';return '<input data-cf="'+k+'" type="'+(f[2]==='date'?'date':'text')+'" value="'+esc(v)+'">'}
+function vCrf(){var r=S.crf,d=r.data||{},k=kase(r.row['案件ID'])||{};
+  var h='<div class="card crfed"><div class="row"><b style="margin-right:auto">📝 客戶需求表 '+esc(r.row['需求表ID']||'（新）')+(r.row['填表方式']==='線上'?' <span class="tag">客戶線上填寫</span>':'')+'</b><button class="s" onclick="crfSave(1)">🖨 存檔並列印</button></div>'+
+  CRF.SECTIONS.map(function(sec){return '<h4>'+sec[0]+'</h4><div class="grid">'+sec[1].map(function(f){var wide=f[2]==='checks'||f[2]==='radio'||f[2]==='textarea';
+    return '<div'+(wide?' style="grid-column:1/-1"':'')+'><label>'+f[1]+'</label>'+crfInput(f,d[f[0]])+'</div>'}).join('')+'</div>'}).join('')+
+  '<p><label style="display:inline"><input type="checkbox" id="cfOk" style="width:auto"'+(d['_同意']?' checked':'')+'> 客戶已同意個資條款</label></p>'+
+  '<div class="row"><button class="p" onclick="crfSave()">儲存</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div></div>';
+  h+='<div class="card"><b>聯繫紀錄</b><div class="scroll"><table><tr><th style="width:120px">日期</th><th>內容</th></tr>'+(r.contacts||[]).map(function(c){return '<tr><td>'+esc(c['日期'])+'</td><td>'+esc(c['內容'])+'</td></tr>'}).join('')+'</table></div>'+
+  (r.row['需求表ID']?'<div class="row" style="margin-top:6px"><input type="date" id="ctD" value="'+D.today+'" style="max-width:160px"><input id="ctT" placeholder="例：電話約丈量 11/5 下午" style="flex:1"><button class="p" id="ctAdd" onclick="crfAddCt()">＋新增</button></div>':'<p class="muted">先儲存需求表才能新增聯繫紀錄。</p>')+'</div>';
+  $('#app').innerHTML=h}
+function crfCollect(){var o={};crfFields().forEach(function(f){var k=f[0];if(f[2]==='checks')o[k]=[].slice.call(document.querySelectorAll('[name="cf_'+k+'"]:checked')).map(function(i){return i.value});
+  else if(f[2]==='radio'){var i=document.querySelector('[name="cf_'+k+'"]:checked');o[k]=i?i.value:''}else{var i=document.querySelector('[data-cf="'+k+'"]');o[k]=i?i.value:''}});o['_同意']=$('#cfOk').checked;return o}
+function crfSave(pr){var d=crfCollect();api('saveCRF',S.crf.row,d).then(function(res){if(res.warnings.length)toast('⚠ '+res.warnings.join('；'));else toast('需求表已儲存');
+  return load().then(function(){return api('getCRF',res.id)}).then(function(r){S.crf=r;S.view=pr?'crfPrint':'crf';render()})})}
+function crfAddCt(){var t=$('#ctT').value;if(!t.trim())return;api('addContact',S.crf.row['需求表ID'],$('#ctD').value,t).then(function(){return api('getCRF',S.crf.row['需求表ID'])}).then(function(r){S.crf=r;toast('已新增聯繫紀錄');vCrf()})}
+function convCrf(id){api('convertCRF',id).then(function(r){toast('已建立 '+r.customerId+' / '+r.caseId);S.caseId=r.caseId;S.view='case';load()})}
+function vCrfPrint(){var r=S.crf;$('#app').innerHTML='<div class="noprint row" style="max-width:800px;margin:0 auto 10px"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button>'+(r.row['狀態']==='待處理'?'<button class="p" onclick="convCrf(\''+r.row['需求表ID']+'\')">轉成客戶＋案件</button>':'<button class="s" onclick="S.view=\'crf\';render()">編輯</button>')+'<button class="s" onclick="S.view=S.crf.row[\'案件ID\']?\'case\':\'list\';render()">返回</button></div>'+
+  crfPrintHtml(r.data,r.contacts,{id:r.row['客戶ID']||r.row['需求表ID']})}
+
+document.getElementById('hdLogo').src=BH_LOGO;$('#lgLogo').src=BH_LOGO;
+boot();
+</script></body></html>
