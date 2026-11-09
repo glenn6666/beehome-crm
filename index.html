@@ -260,7 +260,7 @@ function money(n){return Math.round(bhNum(n)).toLocaleString('en-US')}
 function toast(m){var t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
 // ---- 連線 Apps Script API（fetch，POST text/plain 避免 CORS 預檢）----
 // 部署後的 Apps Script 網址；留空時在登入畫面貼上一次即可（存在這台裝置）
-var API_URL_DEFAULT='';
+var API_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyfAxoHYI9FbyxKaYI7NyoacJNKbn5pnJRJYdMVg08N_nqEVy6bzlUypevj23SHFfLW/exec';
 var K_URL='bhCrmApiUrl',K_TOK='bhCrmToken';
 function apiUrl(){return API_URL_DEFAULT||localStorage.getItem(K_URL)||''}
 function post(body){var u=apiUrl();if(!u)return Promise.reject(new Error('尚未設定 Apps Script 網址'));
