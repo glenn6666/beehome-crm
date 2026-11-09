@@ -341,7 +341,7 @@ function vCase(){
   var ss=scheds(k['案件ID']);
   h+='<div class="card"><div class="row"><b style="margin-right:auto">工期表・合約</b><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
     ss.map(function(x){return '<tr><td>S'+x['版本']+'</td><td>'+esc(x['報價ID'])+'</td><td>'+x['開工日']+'</td><td>'+x['完工日']+'</td><td class="num">'+x['工作天數']+'</td><td style="white-space:nowrap"><button class="s" onclick="openSched(\''+x['工期ID']+'\')">複製修改</button> <button class="s" onclick="openSchedPrint(\''+x['工期ID']+'\')">工期表</button></td></tr>'}).join('')+'</table></div>'+
-    (ss.length?'':'<p class="muted">還沒有工期表。會用「已簽約」的報價（沒有的話用最新版）產生。</p>')+'<p class="muted">合約會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p></div>';
+    (ss.length?'':'<p class="muted">還沒有工期表。有報價會用「已簽約」的報價（沒有的話用最新版）帶入工種；沒有報價也可以直接產生，自己加工項。</p>')+'<p class="muted">合約不需要報價，會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p></div>';
   $('#app').innerHTML=h;
 }
 function editCase(){var k=Object.assign({},kase(S.caseId));form('編輯案件 '+k['案件ID'],KF,k,function(o){api('saveCase',o).then(function(){toast('已儲存');S.view='case';load()})})}
@@ -433,13 +433,13 @@ function openSched(fromId){
   var k=kase(S.caseId);S.sv={start:'',note:'',rows:[],qid:''};
   if(fromId){var s0=(D.schedules||[]).filter(function(x){return x['工期ID']===fromId})[0];
     return api('getScheduleRows',fromId).then(function(rs){S.sv={start:s0['開工日'],qid:s0['報價ID'],from:fromId,note:'',rows:rs.map(function(r){return{cat:r['工程類別'],days:r['天數'],par:r['與上項同時']==='是',note:r['備註']}})};S.view='sched';render()})}
-  var q=pickQuote(k['案件ID']);if(!q)return alert('請先建立報價');
+  var q=pickQuote(k['案件ID']);if(!q){S.sv={start:bhNextWork(D.today,skipDay(),D.holidays),qid:'',note:'',rows:[]};S.view='sched';render();return}
   api('getQuoteLines',q['報價ID']).then(function(ls){var cats=[];ls.forEach(function(l){if(cats.indexOf(l['工程類別'])<0)cats.push(l['工程類別'])});
     S.sv={start:bhNextWork(D.today,skipDay(),D.holidays),qid:q['報價ID'],note:'',rows:bhScheduleRowsFromCats(cats,durMap())};S.view='sched';render()})}
 function schedCalc(){return bhSchedule(S.sv.rows,S.sv.start,skipDay(),D.holidays)}
 function vSched(){var k=kase(S.caseId),qs=caseQuotes(k['案件ID']);
-  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 工期表'+(S.sv.from?'（從 '+S.sv.from+' 複製）':'')+'</b><p class="muted">工種來自報價，天數是「工期預設」分頁的預設值，可直接改。休息日：'+(skipDay()==='六日'?'週六、日':skipDay()==='日'?'週日':'不休')+'＋「假日」分頁的國定假日。勾「同時」表示與上一項同一天開工。</p>'+
-  '<div class="grid"><div><label>開工日</label><input type="date" id="sStart" value="'+esc(S.sv.start)+'" onchange="S.sv.start=this.value;drawSched()"></div><div><label>依據報價</label><select onchange="S.sv.qid=this.value">'+qs.map(function(q){return '<option'+(q['報價ID']===S.sv.qid?' selected':'')+'>'+q['報價ID']+'</option>'}).join('')+'</select></div><div><label>備註（存成新版本）</label><input id="sNote" placeholder="例：木作延後一週"></div></div></div>'+
+  var h='<div class="card"><b>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 工期表'+(S.sv.from?'（從 '+S.sv.from+' 複製）':'')+'</b><p class="muted">工種來自報價（沒有報價時用下方「＋加工項」自己加），天數是「工期預設」分頁的預設值，可直接改。休息日：'+(skipDay()==='六日'?'週六、日':skipDay()==='日'?'週日':'不休')+'＋「假日」分頁的國定假日。勾「同時」表示與上一項同一天開工。</p>'+
+  '<div class="grid"><div><label>開工日</label><input type="date" id="sStart" value="'+esc(S.sv.start)+'" onchange="S.sv.start=this.value;drawSched()"></div><div><label>依據報價</label><select onchange="S.sv.qid=this.value">'+qs.map(function(q){return '<option'+(q['報價ID']===S.sv.qid?' selected':'')+'>'+q['報價ID']+'</option>'}).join('')+'<option value=""'+(S.sv.qid?'':' selected')+'>不依報價</option></select></div><div><label>備註（存成新版本）</label><input id="sNote" placeholder="例：木作延後一週"></div></div></div>'+
   '<div class="card"><div class="scroll"><table class="ed"><tr><th>#</th><th>工程類別</th><th>天數</th><th>同時</th><th>開始</th><th>結束</th><th>備註</th><th></th></tr><tbody id="srows"></tbody></table></div><br><div class="row"><select id="sAdd">'+BH.CATEGORIES.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select><button class="s" onclick="S.sv.rows.push({cat:$(\'#sAdd\').value,days:durMap()[$(\'#sAdd\').value]||BH.DURATIONS[$(\'#sAdd\').value]||3});drawSched()">＋加工項</button></div></div>'+
   '<div class="sum" id="ssum"></div><br><div class="card row"><button class="p" onclick="saveSched()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div>';
   $('#app').innerHTML=h;drawSched()}
