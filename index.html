@@ -134,6 +134,18 @@ table{border-collapse:collapse;width:100%}
   .case{padding:14px}
   .search{max-width:none;flex:1}
 }
+
+.inq-thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.inq-thumbs .im{width:168px;border:1.5px solid #efe9dc;border-radius:12px;padding:8px;background:#faf8f3;position:relative}
+.inq-thumbs img{width:100%;height:104px;object-fit:contain;background:#fff;border-radius:8px;display:block}
+.inq-thumbs .im input{margin-top:6px;min-height:32px;font-size:13px}
+.inq-thumbs .im .x{position:absolute;top:6px;right:6px;min-height:28px!important;padding:2px 8px!important}
+.inq-trade{border:1.5px solid #efe9dc;border-radius:12px;padding:12px 14px;margin:8px 0;background:#fff}
+.inq-trade.on{border-color:#e0b03a;background:#fffdf5}
+.inq-trade .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.inq-trade .top label{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#1a1a1a;margin:0}
+.inq-trade .top input{width:auto;min-height:20px}
+.inq-trade textarea{min-height:84px}
 }
 
 #login{display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px}
@@ -347,6 +359,192 @@ var CRF_CSS = '.crf{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft Jhe
 //node
 if (typeof module!=='undefined') module.exports={CRF:CRF,crfFields:crfFields,crfClean:crfClean,crfPrintHtml:crfPrintHtml,CRF_CSS:CRF_CSS};
 
+// ===== 工班詢價單（前端列印與本機產出共用）=====
+var INQ_EXTRA_CATS = ['冷氣工程','鋁框門工程','窗簾工程','玻璃工程','櫥櫃換色','卡多泥地板工程'];
+var INQ_IMG_LABELS = ['現況平面圖','完成平面圖','完成 3D 俯視圖'];
+var INQ_QUOTE_TEMPLATES = {
+  '保護工程': [
+    {item:'全室地面、牆面及門窗框保護',unit:'式',note:'含材料、工資與完工拆除'},
+    {item:'當樓層公共動線保護',unit:'式',note:'電梯廳至本戶'},
+    {item:'保護材料完工拆除及清運',unit:'式',note:''}
+  ],
+  '拆除工程': [
+    {item:'拆除既有踢腳板',unit:'式',note:'含清運，勿傷地坪與牆面'},
+    {item:'拆除廁所門片',unit:'樘',note:'請註明是否含門框'},
+    {item:'廢棄物清運離場',unit:'式',note:''}
+  ],
+  '泥作工程': [
+    {item:'玄關六角磚地坪',unit:'m²',note:'含底層處理、鋪貼、填縫、收邊'},
+    {item:'與鄰接地坪交接處理',unit:'式',note:'與客廳／原地面平整銜接'}
+  ],
+  '水電工程': [
+    {item:'既有插座局部移位',unit:'處',note:'點位依完成圖，數量現場點交'},
+    {item:'新增燈具迴路與開關',unit:'處',note:'請註明是否含燈具本體'},
+    {item:'配合櫃體／電視牆／冷氣點位',unit:'式',note:''}
+  ],
+  '冷氣工程': [
+    {item:'室內機安裝',unit:'台',note:'請建議機型與容量'},
+    {item:'室外機安裝（含支架）',unit:'台',note:'位置依現場（後陽台或指定處）'},
+    {item:'銅管、排水、配線、真空試俥',unit:'式',note:'請註明是否含室內機本體'}
+  ],
+  '木作工程': [
+    {item:'全室天花板',unit:'坪',note:'範圍請依完成圖並註明廚房／衛浴是否施作'},
+    {item:'電視牆面造型',unit:'式',note:'含結構與底板，飾面配合油漆／系統櫃'},
+    {item:'廁所隱藏門（含五金）',unit:'樘',note:'與電視牆一體'}
+  ],
+  '木工工程': [
+    {item:'全室天花板',unit:'坪',note:'範圍請依完成圖並註明廚房／衛浴是否施作'},
+    {item:'電視牆面造型',unit:'式',note:'含結構與底板，飾面配合油漆／系統櫃'},
+    {item:'廁所隱藏門（含五金）',unit:'樘',note:'與電視牆一體'}
+  ],
+  '鋁框門工程': [
+    {item:'主臥衣櫃鋁框推拉門',unit:'式',note:'尺寸依現場開口'},
+    {item:'主臥鋁框推門',unit:'樘',note:'請註明玻璃或板材規格'}
+  ],
+  '油漆工程': [
+    {item:'全室牆面及天花板油漆',unit:'坪',note:'含批土、底漆、面漆，色號後定'},
+    {item:'局部藝術漆',unit:'m²',note:'位置依現場指定，請另列工法與漆種'}
+  ],
+  '系統櫃工程': [
+    {item:'電視櫃',unit:'式',note:'尺寸依完成圖及現場丈量'},
+    {item:'玄關櫃',unit:'式',note:''},
+    {item:'餐櫃',unit:'式',note:''},
+    {item:'冰箱櫃',unit:'式',note:'請現場確認冰箱尺寸'},
+    {item:'主臥衣櫃',unit:'式',note:'門片若為鋁框請分項（櫃體不含門）'}
+  ],
+  '木地板工程': [
+    {item:'主臥木地板',unit:'坪',note:'含地墊、收邊，材質請建議或依指定'},
+    {item:'門坎及與鄰接地坪銜接',unit:'式',note:'請確認是否與卡多泥重疊'}
+  ],
+  '櫥櫃換色': [
+    {item:'既有廚房門片換色',unit:'式',note:'請註明工法（烤漆／貼皮／換門片）'},
+    {item:'門片拆裝及五金重裝',unit:'式',note:'原則不含重做櫃體'}
+  ],
+  '卡多泥地板工程': [
+    {item:'客廳卡多泥地坪',unit:'坪',note:'含底層處理、塗佈、保護'},
+    {item:'主臥卡多泥地坪',unit:'坪',note:'請依完成圖確認是否施作，勿與木地板重疊報價'},
+    {item:'與玄關磚／木地板交接',unit:'式',note:''}
+  ],
+  '清潔工程': [
+    {item:'完工全室細清',unit:'式',note:'地面、牆面、玻璃、櫃內、衛浴、廚房'},
+    {item:'施工垃圾清運',unit:'式',note:''}
+  ],
+  '窗簾工程': [
+    {item:'主臥百葉簾',unit:'式',note:'尺寸依窗框丈量，材質與顏色後定'},
+    {item:'客廳百葉簾',unit:'式',note:'含軌道／框架及安裝'}
+  ],
+  '智能家居工程': [
+    {item:'Aqara FP2 存在感應器（含本體）',unit:'只',note:'請註明是否含設備本體'},
+    {item:'安裝、配線及系統設定',unit:'式',note:'廚房、陽台、廁所'}
+  ],
+  '智能家居': [
+    {item:'Aqara FP2 存在感應器（含本體）',unit:'只',note:'請註明是否含設備本體'},
+    {item:'安裝、配線及系統設定',unit:'式',note:'廚房、陽台、廁所'}
+  ],
+  '玻璃工程': [
+    {item:'玄關局部黑玻璃',unit:'式',note:'厚度與規格請建議，尺寸依現場丈量'},
+    {item:'裁切、磨邊及安裝五金',unit:'式',note:''}
+  ]
+};
+function inqEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function inqSuggestCats(cats){
+  var out=[], seen={};
+  (cats||[]).concat(INQ_EXTRA_CATS).forEach(function(c){ if(c&&!seen[c]){seen[c]=1;out.push(c)} });
+  return out;
+}
+function inqStorageKey(caseId){return 'bhInq:'+caseId}
+function inqDefaultQuoteRows(cat){
+  var keys=Object.keys(INQ_QUOTE_TEMPLATES);
+  var k=INQ_QUOTE_TEMPLATES[cat]?cat:keys.filter(function(x){return cat&&(cat.indexOf(x)>=0||x.indexOf(cat)>=0)})[0];
+  var t=(INQ_QUOTE_TEMPLATES[k]||[{item:cat||'',unit:'式',note:'含材料與工資，數量依現場丈量'}]).map(function(r){
+    return {item:r.item,unit:r.unit||'',qty:'',price:'',amount:'',note:r.note||''};
+  });
+  while(t.length<5) t.push({item:'',unit:'',qty:'',price:'',amount:'',note:''});
+  return t;
+}
+function inqEmptyState(cats){
+  return {due:'',imgs:[],trades:inqSuggestCats(cats).map(function(c){return {on:false,cat:c,need:''}})};
+}
+function inqNeedList(need){
+  return String(need||'').split(/\r?\n/).map(function(s){return s.replace(/^\s*[\-・●•]\s*/,'').trim()}).filter(Boolean);
+}
+var INQ_CSS = '.iq{font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;color:#222;font-size:12px;line-height:1.45;background:#fff;max-width:190mm;margin:0 auto 16px;padding:0}'+
+'.iq-sheet{background:#fff;padding:0 0 8px}'+
+'.iq-brand{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:3px solid #1a1a1a;padding-bottom:6px;gap:12px}'+
+'.iq-brand .plogo{height:40px;display:block;margin:0}'+
+'.iq-kicker{font-size:12px;font-weight:700;color:#6b6256;letter-spacing:.08em}'+
+'.iq-title{font-size:22px;font-weight:800;letter-spacing:.28em;margin:2px 0 0}'+
+'.iq-sub{font-size:14px;font-weight:700;color:#1a1a1a;letter-spacing:.12em;margin-top:2px}'+
+'.iq-sub span{color:#c9a017}'+
+'.iq-meta{display:grid;grid-template-columns:1fr 1fr;gap:3px 18px;border:1px solid #333;padding:7px 10px;margin:8px 0;font-size:12px}'+
+'.iq-meta b{font-weight:700}'+
+'.iq h3{background:#1a1a1a;color:#f6c445;font-size:12.5px;padding:4px 8px;margin:10px 0 6px;letter-spacing:.12em;font-weight:700}'+
+'.iq-figs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0}'+
+'.iq-figs figure{margin:0;border:1px solid #333;padding:4px;text-align:center;background:#faf8f3;min-height:0}'+
+'.iq-figs img{width:100%;height:34mm;object-fit:contain;display:block;background:#fff}'+
+'.iq-figs .ph{height:34mm;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;background:#fff}'+
+'.iq-figs figcaption{font-size:11px;font-weight:700;margin-top:3px}'+
+'.iq ul{margin:0;padding-left:1.15em}.iq li{margin:2px 0}'+
+'.iq table{width:100%;border-collapse:collapse;table-layout:fixed}'+
+'.iq th,.iq td{border:1px solid #333;padding:4px 6px;font-size:11.5px;height:22px;vertical-align:middle}'+
+'.iq th{background:#f6f1e6;font-weight:700;text-align:center}'+
+'.iq td.num{text-align:right}'+
+'.iq .c{text-align:center}'+
+'.iq-note{font-size:11px;color:#333;margin:8px 0 0;line-height:1.55}'+
+'.iq-sign{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:10px;font-size:12px}'+
+'.iq-sign p{margin:4px 0}'+
+'@media print{.iq{max-width:none;margin:0}.iq-sheet{break-after:page;page-break-after:always}.iq-sheet:last-child{break-after:auto;page-break-after:auto}@page{size:A4 portrait;margin:9mm}.iq-figs img,.iq-figs .ph{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
+
+function inqSheetHtml(opt){
+  opt=opt||{};
+  var esc=opt.esc||inqEsc;
+  var needs=opt.needs||[];
+  var rows=opt.quoteRows||inqDefaultQuoteRows(opt.tradeName);
+  var imgs=opt.imgs||[];
+  var logo=opt.logo||'';
+  var no=opt.tradeNo, total=opt.tradeTotal;
+  var pageLabel=(no&&total)?('（'+no+'／'+total+'）'):'';
+  var fig=INQ_IMG_LABELS.map(function(lb,i){
+    var im=imgs[i]||{};
+    var label=im.label||lb;
+    var src=im.dataUrl||im.src||'';
+    var body=src?'<img src="'+src+'" alt="'+esc(label)+'">':'<div class="ph">（未附圖）</div>';
+    return '<figure>'+body+'<figcaption>'+esc(label)+'</figcaption></figure>';
+  }).join('');
+  var needHtml=needs.length?'<ul>'+needs.map(function(n){return '<li>'+esc(n)+'</li>'}).join('')+'</ul>':'<p style="color:#777">（請填寫施作範圍與需求）</p>';
+  var trs=rows.map(function(r){
+    return '<tr><td>'+esc(r.item)+'</td><td class="c">'+esc(r.unit)+'</td><td class="num">'+esc(r.qty)+'</td><td class="num">'+esc(r.price)+'</td><td class="num">'+esc(r.amount)+'</td><td>'+esc(r.note)+'</td></tr>';
+  }).join('');
+  return '<section class="iq iq-sheet">'+
+    '<div class="iq-brand"><div><div class="iq-kicker">'+esc(opt.company||'蜂宅室內裝修有限公司')+'</div>'+
+    '<div class="iq-title">工程詢價單</div>'+
+    '<div class="iq-sub"><span>'+esc(opt.tradeName||'')+'</span> '+esc(pageLabel)+'</div></div>'+
+    (logo?'<img class="plogo" alt="蜂宅 BEE HOME" src="'+logo+'">':'')+'</div>'+
+    '<div class="iq-meta">'+
+    '<div>案　　名：<b>'+esc(opt.caseName||'')+'</b></div>'+
+    '<div>客　　戶：<b>'+esc(opt.customer||'')+'</b></div>'+
+    '<div>地　　址：<b>'+esc(opt.address||'')+'</b></div>'+
+    '<div>坪數／屋況：<b>'+esc(opt.ping||'')+(opt.ping?' 坪':'')+(opt.houseType?' ／ '+opt.houseType:'')+'</b></div>'+
+    '<div>詢價日期：<b>'+esc(opt.date||'')+'</b></div>'+
+    '<div>回覆期限：<b>'+esc(opt.due||'')+'</b></div>'+
+    '<div>聯 絡 人：<b>'+esc(opt.contact||'')+'</b></div>'+
+    '<div>聯絡電話：<b>'+esc(opt.phone||'')+'</b></div>'+
+    '</div>'+
+    '<h3>圖　面</h3><div class="iq-figs">'+fig+'</div>'+
+    '<p class="iq-note">左為目前現況，右兩張為完成平面配置與完成 3D。圖面僅供詢價參考，數量以現場丈量為準。</p>'+
+    '<h3>工程項目　／　施作範圍與需求</h3>'+needHtml+
+    '<h3>報　價　欄　（請廠商填寫）</h3>'+
+    '<table><colgroup><col style="width:28%"><col style="width:8%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:30%"></colgroup>'+
+    '<tr><th>項目</th><th>單位</th><th>數量</th><th>單價</th><th>複價</th><th>備註</th></tr>'+trs+
+    '<tr><th colspan="4">報價合計（未稅）</th><td></td><td></td></tr></table>'+
+    '<div class="iq-sign">'+
+    '<div><p>預估工期：＿＿＿＿＿ 工作天</p><p>可施工／進場日：＿＿＿＿＿＿＿＿</p><p>報價有效期限：＿＿＿＿＿＿＿＿</p></div>'+
+    '<div><p>廠商名稱：＿＿＿＿＿＿＿＿＿＿</p><p>報 價 人：＿＿＿＿＿＿＿＿＿＿</p><p>聯絡電話：＿＿＿＿＿＿＿＿＿＿</p></div></div>'+
+    '<p class="iq-note">1. 請含材料與工資，並分別註明單價與數量；未列項目請自行加列。<br>2. 數量以現場丈量為準，圖面尺寸僅供參考。<br>3. 請於回覆期限前將本單填妥後回覆聯絡人，謝謝。</p>'+
+    '</section>';
+}
+if (typeof module!=='undefined') module.exports={INQ_EXTRA_CATS:INQ_EXTRA_CATS,INQ_IMG_LABELS:INQ_IMG_LABELS,INQ_QUOTE_TEMPLATES:INQ_QUOTE_TEMPLATES,INQ_CSS:INQ_CSS,inqEsc:inqEsc,inqSuggestCats:inqSuggestCats,inqStorageKey:inqStorageKey,inqDefaultQuoteRows:inqDefaultQuoteRows,inqEmptyState:inqEmptyState,inqNeedList:inqNeedList,inqSheetHtml:inqSheetHtml};
+
 var D=null, S={view:'list',stage:'全部'};
 function $(s){return document.querySelector(s)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -386,7 +584,7 @@ function pays(id){return D.payments.filter(function(p){return p['案件ID']===id
 function unpaid(id){return pays(id).some(function(p){return bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today})}
 function render(){
   document.querySelectorAll('header button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===S.view)});
-  ({list:vList,case:vCase,editor:vEditor,prices:vPrices,print:vPrint,sched:vSched,schedPrint:vSchedPrint,contract:vContract,ctEdit:vCtEdit,crf:vCrf,crfPrint:vCrfPrint})[S.view]();
+  ({list:vList,case:vCase,editor:vEditor,prices:vPrices,print:vPrint,sched:vSched,schedPrint:vSchedPrint,contract:vContract,ctEdit:vCtEdit,crf:vCrf,crfPrint:vCrfPrint,inquiry:vInquiry,inquiryPrint:vInquiryPrint})[S.view]();
   window.scrollTo(0,0);
 }
 // ---- 案件列表 ----
@@ -433,9 +631,9 @@ function vCase(){
     ps.map(function(p,i){var late=bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today;
       return '<tr style="'+(late?'color:var(--r);font-weight:600':'')+'"><td>'+p['期別']+' '+p['比例%']+'%</td><td class="num">'+money(p['應收金額'])+'</td><td><input type="date" id="pd'+i+'" value="'+esc(p['應收日期'])+'"></td><td><input id="pr'+i+'" value="'+bhNum(p['已收金額'])+'" style="width:100px"></td><td><input type="date" id="pp'+i+'" value="'+esc(p['收款日'])+'"></td><td class="num">'+money(p['餘額'])+'</td><td><button class="s" onclick="savePay('+i+')">存</button></td></tr>'}).join('')+'</table></div><p class="muted">有應收日期、到期且未收清的期別會標紅；每天 9 點自動寄提醒給老闆（含 3 天內到期）。</p></div>';
   var ss=scheds(k['案件ID']);
-  h+='<div class="card"><div class="card-hd"><h3>工期表・合約</h3><div class="acts"><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button></div></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
+  h+='<div class="card"><div class="card-hd"><h3>工期表・合約</h3><div class="acts"><button class="p" id="btnSched" onclick="openSched()">＋產生工期表</button><button class="p" id="btnContract" onclick="openContract()">📄 產生合約</button><button class="p" id="btnCrf" onclick="openCrf()">📝 客戶需求表</button><button class="p" id="btnInquiry" onclick="openInquiry()">詢價單</button></div></div><div class="scroll"><table><tr><th>工期版本</th><th>依據報價</th><th>開工</th><th>完工</th><th class="num">工作天</th><th></th></tr>'+
     ss.map(function(x){return '<tr><td>S'+x['版本']+'</td><td>'+esc(x['報價ID'])+'</td><td>'+x['開工日']+'</td><td>'+x['完工日']+'</td><td class="num">'+x['工作天數']+'</td><td style="white-space:nowrap"><button class="s" onclick="openSched(\''+x['工期ID']+'\')">複製修改</button> <button class="s" onclick="openSchedPrint(\''+x['工期ID']+'\')">工期表</button></td></tr>'}).join('')+'</table></div>'+
-    (ss.length?'':'<p class="muted">還沒有工期表。有報價會用「已簽約」的報價（沒有的話用最新版）帶入工種；沒有報價也可以直接產生，自己加工項。</p>')+'<p class="muted">合約不需要報價，會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p></div>';
+    (ss.length?'':'<p class="muted">還沒有工期表。有報價會用「已簽約」的報價（沒有的話用最新版）帶入工種；沒有報價也可以直接產生，自己加工項。</p>')+'<p class="muted">合約不需要報價，會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p><p class="muted">「詢價單」可勾選工種、填需求、加上現況與完成圖，一張工種印成一張給工班詢價（圖面只存在這台瀏覽器）。</p></div>';
   $('#app').innerHTML=h;
 }
 function editCase(){var k=Object.assign({},kase(S.caseId));form('編輯案件 '+k['案件ID'],KF,k,function(o){api('saveCase',o).then(function(){toast('已儲存');S.view='case';load()})})}
@@ -617,6 +815,127 @@ function crfAddCt(){var t=$('#ctT').value;if(!t.trim())return;api('addContact',S
 function convCrf(id){api('convertCRF',id).then(function(r){toast('已建立 '+r.customerId+' / '+r.caseId);S.caseId=r.caseId;S.view='case';load()})}
 function vCrfPrint(){var r=S.crf;$('#app').innerHTML='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button>'+(r.row['狀態']==='待處理'?'<button class="p" onclick="convCrf(\''+r.row['需求表ID']+'\')">轉成客戶＋案件</button>':'<button class="s" onclick="S.view=\'crf\';render()">編輯</button>')+'<button class="s" onclick="S.view=S.crf.row[\'案件ID\']?\'case\':\'list\';render()">返回</button></div>'+
   crfPrintHtml(r.data,r.contacts,{id:r.row['客戶ID']||r.row['需求表ID']})}
+
+
+// ---- 詢價單 ----
+function openInquiry(){
+  S.inq=null;
+  try{var raw=localStorage.getItem(inqStorageKey(S.caseId)); if(raw){var o=JSON.parse(raw); if(o&&o.trades) S.inq=o;}}catch(e){}
+  if(!S.inq){
+    S.inq=inqEmptyState(BH.CATEGORIES);
+    var q=pickQuote(S.caseId);
+    if(q){
+      return api('getQuoteLines',q['報價ID']).then(function(ls){
+        var has={};ls.forEach(function(l){has[l['工程類別']]=1});
+        S.inq.trades.forEach(function(t){if(has[t.cat])t.on=true});
+        S.view='inquiry';render();
+      }).catch(function(){S.view='inquiry';render()});
+    }
+  }
+  S.view='inquiry';render();
+}
+function inqSync(){
+  if(!S.inq)return;
+  var d=$('#inqDue'); if(d) S.inq.due=d.value;
+  document.querySelectorAll('[data-inq]').forEach(function(el){
+    var i=+el.dataset.inq; if(!S.inq.trades[i])return;
+    if(el.type==='checkbox') S.inq.trades[i].on=el.checked;
+    else S.inq.trades[i].need=el.value;
+  });
+  document.querySelectorAll('[data-il]').forEach(function(el){
+    var i=+el.dataset.il; if(S.inq.imgs[i]) S.inq.imgs[i].label=el.value;
+  });
+}
+function inqPersist(){
+  inqSync();
+  try{localStorage.setItem(inqStorageKey(S.caseId), JSON.stringify(S.inq));return true}
+  catch(e){toast('圖面較大，無法暫存到這台瀏覽器，列印仍可使用');return false}
+}
+function inqGoPrint(){
+  inqSync();
+  if(!S.inq.trades.some(function(t){return t.on&&t.cat})) return alert('請至少勾選一個工種');
+  inqPersist();
+  S.view='inquiryPrint';render();
+}
+function inqAll(on){inqSync();S.inq.trades.forEach(function(t){t.on=!!on});vInquiry()}
+function inqAddCat(){
+  inqSync();
+  var n=($('#inqNewCat')&&$('#inqNewCat').value||'').trim();
+  if(!n)return;
+  var hit=S.inq.trades.filter(function(t){return t.cat===n})[0];
+  if(hit) hit.on=true; else S.inq.trades.push({on:true,cat:n,need:''});
+  vInquiry();
+}
+function inqCompress(dataUrl, cb){
+  var im=new Image();
+  im.onload=function(){
+    var max=1600,w=im.width,h=im.height;
+    if(w<=max&&h<=max&&dataUrl.length<1200000){cb(dataUrl);return}
+    if(w>max||h>max){var s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+    var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    cv.getContext('2d').drawImage(im,0,0,w,h);
+    cb(cv.toDataURL('image/jpeg',0.85));
+  };
+  im.onerror=function(){cb(dataUrl)};
+  im.src=dataUrl;
+}
+function inqAddImg(files){
+  inqSync();
+  var list=[].slice.call(files||[],0,3-S.inq.imgs.length);
+  function next(){
+    if(!list.length){inqPersist();vInquiry();return}
+    var f=list.shift();
+    if(f.type&&f.type.indexOf('image/')!==0){next();return}
+    var rd=new FileReader();
+    rd.onload=function(){inqCompress(rd.result,function(url){
+      S.inq.imgs.push({label:INQ_IMG_LABELS[S.inq.imgs.length]||('圖面 '+(S.inq.imgs.length+1)),dataUrl:url});
+      next();
+    })};
+    rd.readAsDataURL(f);
+  }
+  next();
+}
+function inqDelImg(i){inqSync();S.inq.imgs.splice(i,1);S.inq.imgs.forEach(function(im,n){if(!im.label||INQ_IMG_LABELS.indexOf(im.label)>=0)im.label=INQ_IMG_LABELS[n]||im.label});inqPersist();vInquiry()}
+function vInquiry(){
+  var k=kase(S.caseId),c=cust(k['客戶ID']);
+  var h='<div class="card"><div class="card-hd"><h3>詢價單 <span class="sub">'+esc(c['姓名'])+' '+esc(k['案件ID'])+'</span></h3><div class="acts">'+
+    '<button class="p" id="btnInqPrint" onclick="inqGoPrint()">🖨 列印 / 存 PDF</button>'+
+    '<button class="s" onclick="inqPersist();toast(\'已暫存在這台瀏覽器\')">儲存草稿</button>'+
+    '<button class="s" onclick="inqSync();S.view=\'case\';render()">返回</button></div></div>'+
+    '<p class="muted">每個勾選的工種會印成一張詢價單給該工班。建議左邊放現況平面圖、右邊兩張放完成平面圖與完成 3D。圖面與需求只存在這台電腦的瀏覽器，不會傳到雲端。</p>'+
+    '<div class="grid"><div class="kv"><label>回覆期限</label><input type="date" id="inqDue" value="'+esc(S.inq.due||'')+'"></div>'+
+    '<div class="kv"><label>本案資訊</label><div class="val">'+esc(k['案名']||'')+'　'+esc(siteAddr(k,c))+'　'+esc(k['坪數'])+'坪　'+esc(k['屋況'])+'</div></div></div></div>';
+  h+='<div class="card"><div class="card-hd"><h3>圖面（最多 3 張）</h3></div>'+
+    '<div class="inq-thumbs" id="inqThumbs">'+S.inq.imgs.map(function(im,i){
+      return '<div class="im"><button class="s x" onclick="inqDelImg('+i+')">✕</button><img alt="" src="'+im.dataUrl+'"><input data-il="'+i+'" value="'+esc(im.label||INQ_IMG_LABELS[i]||'')+'" placeholder="圖說"></div>';
+    }).join('')+
+    (S.inq.imgs.length<3?'<div class="im" style="display:flex;align-items:center;justify-content:center;min-height:148px"><label style="margin:0;text-align:center;cursor:pointer">＋ 加入圖面<input type="file" accept="image/*" multiple style="display:none" onchange="inqAddImg(this.files)"></label></div>':'')+
+    '</div></div>';
+  h+='<div class="card"><div class="card-hd"><h3>工種與需求</h3><div class="acts"><button class="s" id="inqAll" onclick="inqAll(1)">全選</button><button class="s" id="inqNone" onclick="inqAll(0)">全不選</button></div></div>'+
+    '<div class="row gap"><input id="inqNewCat" placeholder="自訂工種，例如：玻璃工程" style="max-width:280px"><button class="s" onclick="inqAddCat()">＋加入工種</button></div>'+
+    S.inq.trades.map(function(t,i){
+      return '<div class="inq-trade'+(t.on?' on':'')+'"><div class="top"><label><input type="checkbox" data-inq="'+i+'"'+(t.on?' checked':'')+' onchange="this.closest(\'.inq-trade\').classList.toggle(\'on\',this.checked)">'+esc(t.cat)+'</label></div>'+
+        '<textarea data-inq="'+i+'" placeholder="施作範圍與需求，一行一項。例如：全室天花板；電視牆造型含廁所隱藏門">'+esc(t.need||'')+'</textarea></div>';
+    }).join('')+'</div>';
+  $('#app').innerHTML=h;
+}
+function inqMeta(){
+  var k=kase(S.caseId),c=cust(k['客戶ID']),st=D.settings||{};
+  var phone=String(st['公司電話']||'').replace(/\D/g,'');
+  if(phone.length===9&&phone.charAt(0)==='9') phone='0'+phone;
+  return {logo:BH_LOGO,company:st['合約公司名稱']||'蜂宅室內裝修有限公司',brand:st['公司名稱']||'蜂宅設計',
+    customer:c['姓名'],caseName:k['案名']||caseName(k,c),address:siteAddr(k,c),ping:k['坪數'],houseType:k['屋況'],
+    date:D.today,due:S.inq.due||'',contact:st['廠商署名']||st['公司負責人']||k['負責人']||'',phone:phone};
+}
+function vInquiryPrint(){
+  inqSync();
+  var trades=S.inq.trades.filter(function(t){return t.on&&t.cat});
+  var meta=inqMeta();
+  var sheets=trades.map(function(t,i){
+    return inqSheetHtml(Object.assign({},meta,{tradeName:t.cat,tradeNo:i+1,tradeTotal:trades.length,needs:inqNeedList(t.need),quoteRows:inqDefaultQuoteRows(t.cat),imgs:S.inq.imgs}));
+  }).join('');
+  $('#app').innerHTML='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'inquiry\';render()">返回編輯</button><button class="s" onclick="S.view=\'case\';render()">返回案件</button></div><style>'+INQ_CSS+'</style>'+sheets;
+}
 
 document.getElementById('hdLogo').src=BH_LOGO;$('#lgLogo').src=BH_LOGO;
 boot();
