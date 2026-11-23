@@ -328,6 +328,33 @@ table{border-collapse:collapse;width:100%}
   .stepper button,.stepper button:first-child,.stepper button:last-child{padding:7px 2px;min-width:0;white-space:nowrap;font-size:12px}
   .grid:has(#qnote):has(#qst){grid-template-columns:minmax(0,1fr)}
 }
+@media screen{
+.trade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.trade-card{border:1px solid #e7e2d7;border-radius:12px;padding:16px;background:#fff}
+.trade-title{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.trade-title h4{font-size:17px;margin:0}.trade-title .tag{font-size:14px}
+.trade-amount{font-size:24px;font-weight:700;margin:12px 0 16px;font-variant-numeric:tabular-nums}
+.trade-total{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;padding:16px 0 0;margin-top:16px;border-top:1px solid #e7e2d7}
+.trade-total span{font-size:14px}.trade-total b{display:block;font-size:18px}
+details.card>summary{cursor:pointer;font-weight:700;padding:4px 0}details[open].card>summary{margin-bottom:16px}
+.trade-editor .ed th{white-space:nowrap}.card.trade-editor .scroll table.ed{min-width:1000px;table-layout:auto}
+.card.trade-editor .scroll table.ed td input[style]{font-size:16px;padding:8px 6px}button:disabled{opacity:.55;cursor:wait}
+@media(max-width:700px){
+.trade-grid{grid-template-columns:1fr}.trade-card .row button{flex:1}
+.card.trade-editor .scroll table.ed{min-width:0;width:100%}.trade-editor .ed thead{display:none}
+.trade-editor .ed,.trade-editor .ed tbody{display:block}
+.trade-editor .ed tr{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 0;border-bottom:2px solid #e7e2d7}
+.trade-editor .ed td{display:block;border:0;padding:0;min-width:0;text-align:left}
+.trade-editor .ed td:first-child,.trade-editor .ed td:nth-child(10){grid-column:1/-1}
+.trade-editor .ed td:before{display:block;color:#625b50;font-size:14px;margin-bottom:3px;content:'項目'}
+.trade-editor .ed td:nth-child(2):before{content:'寬 cm'}.trade-editor .ed td:nth-child(3):before{content:'高／深 cm'}
+.trade-editor .ed td:nth-child(4):before{content:'數量'}.trade-editor .ed td:nth-child(5):before{content:'單位'}
+.trade-editor .ed td:nth-child(6):before{content:'成本價'}.trade-editor .ed td:nth-child(7):before{content:'報價單價'}
+.trade-editor .ed td:nth-child(8):before{content:'小計'}.trade-editor .ed td:nth-child(9):before{content:'廠商'}
+.trade-editor .ed td:nth-child(10):before{content:'備註'}.trade-editor .ed td:last-child:before{content:none}
+.card.trade-editor .scroll table.ed td input[style]{width:100%!important;min-width:0!important;padding:9px;font-size:16px}
+}
+}
 </style></head><body>
 <header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> <span>CRM・報價</span></b>
 <nav class="nav"><button type="button" data-v="list">案件</button><button type="button" data-v="prices">單價庫</button></nav>
@@ -746,7 +773,7 @@ function doLogin(ev){ev.preventDefault();var u=$('#lgUrl').value.trim(),err=$('#
 function logout(){if(!confirm('登出這台裝置？'))return;localStorage.removeItem(K_TOK);D=null;$('#app').textContent='';showLogin('')}
 function boot(){$('#lgForm').onsubmit=doLogin;
   if(apiUrl()&&localStorage.getItem(K_TOK))load().catch(function(e){if(!e.auth)$('#app').textContent='載入失敗：'+(e.message||e)});else showLogin('')}
-function load(){return api('getAll').then(function(d){D=d;render()})}
+function load(){return api('getAll').then(function(d){D=d;S.quoteCache={};render()})}
 document.querySelectorAll('header button[data-v]').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;render()}});
 function cust(id){return D.customers.filter(function(c){return c['客戶ID']===id})[0]||{}}
 function kase(id){return D.cases.filter(function(c){return c['案件ID']===id})[0]}
@@ -794,8 +821,9 @@ function vCase(){
     '<p class="who">📞 '+esc(c['電話'])+' ・ LINE '+esc(c['LINE'])+' ・ '+esc(c['Email'])+(c['地址']?' ・ 🏠 '+esc(c['地址']):'')+'</p><div class="grid">'+
     [['案名'],['地址'],['坪數'],['屋況'],['風格'],['負責人']].map(function(f){return '<div class="kv"><label>'+(f[0]==='地址'?'施工地址':f[0])+'</label><div class="val">'+esc(f[0]==='地址'?siteAddr(k,c):k[f[0]])+'</div></div>'}).join('')+
     '<div class="kv"><label>合約總價</label><div class="val amt">$'+money(k['合約總價'])+'</div></div></div><div class="stage-wrap"><label>階段</label><div class="stepper">'+BH.STAGES.map(function(s){return '<button type="button" class="'+(k['階段']===s?'on':'')+'" onclick="setStage(\''+s+'\')">'+s+'</button>'}).join('')+'</div></div></div>';
-  h+='<div class="card"><div class="card-hd"><h3>報價版本</h3><div class="acts"><button class="p" onclick="openEditor()">＋新報價</button></div></div><div class="scroll"><table><tr><th>版本</th><th>日期</th><th class="num">總價</th><th class="num">毛利率</th><th>狀態</th><th class="hide-m">變更說明</th><th></th></tr>'+
-    qs.map(function(q){return '<tr><td>V'+q['版本']+'</td><td>'+q['日期']+'</td><td class="num">'+money(q['總價'])+'</td><td class="num">'+(q['成本']?q['毛利率%']+'%':'<span class="muted">缺成本</span>')+'</td><td><select onchange="qStatus(\''+q['報價ID']+'\',this.value)">'+['草稿','已送出','已簽約','作廢'].map(function(s){return '<option'+(s===q['狀態']?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td class="hide-m">'+esc(q['變更說明'])+'</td><td style="white-space:nowrap"><button class="s" onclick="openEditor(\''+q['報價ID']+'\')">複製修改</button> <button class="s" onclick="openPrint(\''+q['報價ID']+'\')">報價單</button></td></tr>'}).join('')+'</table></div>'+(qs.length?'':'<p class="muted">還沒有報價。</p>')+'</div>';
+  h+='<div class="card"><div class="card-hd"><h3>各工程報價</h3></div><p class="muted">選擇工程，獨立新增、修改或列印。修改後會保留其他工程，並留下整案歷史版本。</p><div id="tradeQuotes" aria-live="polite">讀取工程報價中…</div></div>';
+  h+='<details class="card"><summary>整案報價歷史（'+qs.length+' 版）</summary><div class="scroll"><table><tr><th>版本</th><th>日期</th><th class="num">總價</th><th class="num">毛利率</th><th>狀態</th><th class="hide-m">變更說明</th><th></th></tr>'+
+    qs.map(function(q){return '<tr><td>V'+q['版本']+'</td><td>'+q['日期']+'</td><td class="num">'+money(q['總價'])+'</td><td class="num">'+(q['成本']?q['毛利率%']+'%':'<span class="muted">缺成本</span>')+'</td><td><select onchange="qStatus(\''+q['報價ID']+'\',this.value)">'+['草稿','已送出','已簽約','作廢'].map(function(s){return '<option'+(s===q['狀態']?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td class="hide-m">'+esc(q['變更說明'])+'</td><td style="white-space:nowrap"><button class="s" onclick="openPrint(\''+q['報價ID']+'\')">整案報價單</button></td></tr>'}).join('')+'</table></div>'+(qs.length?'':'<p class="muted">還沒有報價。</p>')+'</details>';
   var ps=pays(k['案件ID']);
   h+='<div class="card"><div class="card-hd"><h3>收款 <span class="sub">訂金 10／開工 40／木作結束 40／驗收 10</span></h3>'+(ps.length?'':'<div class="acts"><button class="p" onclick="mkPay()">建立收款期別</button></div>')+'</div><div class="scroll"><table><tr><th>期別</th><th class="num">應收</th><th>應收日期</th><th class="num">已收</th><th>收款日</th><th class="num">餘額</th><th></th></tr>'+
     ps.map(function(p,i){var late=bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today;
@@ -805,6 +833,7 @@ function vCase(){
     ss.map(function(x){return '<tr><td>S'+x['版本']+'</td><td>'+esc(x['報價ID'])+'</td><td>'+x['開工日']+'</td><td>'+x['完工日']+'</td><td class="num">'+x['工作天數']+'</td><td style="white-space:nowrap"><button class="s" onclick="openSched(\''+x['工期ID']+'\')">複製修改</button> <button class="s" onclick="openSchedPrint(\''+x['工期ID']+'\')">工期表</button></td></tr>'}).join('')+'</table></div>'+
     (ss.length?'':'<p class="muted">還沒有工期表。有報價會用「已簽約」的報價（沒有的話用最新版）帶入工種；沒有報價也可以直接產生，自己加工項。</p>')+'<p class="muted">合約不需要報價，會帶入客戶、地址、合約總價、收款期別和最新工期表；缺的資料印成空白底線。</p><p class="muted">「詢價單」可勾選工種、填需求、加上現況與完成圖，一張工種印成一張給工班詢價（圖面只存在這台瀏覽器）。</p></div>';
   $('#app').innerHTML=h;
+  drawTradeQuotes();
 }
 function editCase(){var k=Object.assign({},kase(S.caseId));form('編輯案件 '+k['案件ID'],KF,k,function(o){api('saveCase',o).then(function(){toast('已儲存');S.view='case';load()})})}
 function setStage(s){var k=Object.assign({},kase(S.caseId));k['階段']=s;api('saveCase',k).then(load)}
@@ -812,38 +841,57 @@ function qStatus(id,s){api('setQuoteStatus',id,s).then(function(){toast('狀態�
 function mkPay(){api('createPayments',S.caseId).then(function(){toast('已建立 4 期');load()})}
 function savePay(i){var p=pays(S.caseId)[i];api('savePayment',S.caseId,p['期別'],{'應收日期':$('#pd'+i).value,'已收金額':$('#pr'+i).value,'收款日':$('#pp'+i).value}).then(function(){toast('已儲存');load()})}
 // ---- 報價編輯器 ----
-function openEditor(fromId){
-  S.lines=[];S.fromId=fromId||'';
-  if(!fromId){S.view='editor';render();return}
-  api('getQuoteLines',fromId).then(function(ls){S.lines=ls.map(function(l){var sz=String(l['尺寸cm']).replace('cm','').split('×');
-    return {cat:l['工程類別'],item:l['項目'],w:sz[0]||'',h:sz[1]||'',qty:l['換算數量'],unit:l['單位'],cost:l['成本價'],price:l['報價單價'],sup:l['廠商'],note:l['備註']}});S.view='editor';render()});
+function latestTradeQuote(data,id){return data.quotes.filter(function(q){return q['案件ID']===id&&q['狀態']!=='作廢'}).sort(function(a,b){return bhNum(b['版本'])-bhNum(a['版本'])})[0]}
+function tradeLines(id){S.quoteCache=S.quoteCache||{};if(S.quoteCache[id])return Promise.resolve(S.quoteCache[id]);return api('getQuoteLines',id).then(function(ls){S.quoteCache[id]=ls;return ls})}
+function tradeCats(ls){return BH.CATEGORIES.concat(ls.map(function(l){return l['工程類別']})).filter(function(c,i,a){return c&&a.indexOf(c)===i})}
+function tradeFingerprint(ls,cat){return JSON.stringify(ls.filter(function(l){return l['工程類別']===cat}).map(function(l){return ['工程類別','項目','尺寸cm','換算數量','單位','成本價','報價單價','廠商','備註'].map(function(f){return String(l[f]==null?'':l[f])})}))}
+function drawTradeQuotes(){
+  var id=S.caseId,q=latestTradeQuote(D,id),box=$('#tradeQuotes');if(!box)return;
+  (q?tradeLines(q['報價ID']):Promise.resolve([])).then(function(ls){
+    if(S.view!=='case'||S.caseId!==id||$('#tradeQuotes')!==box)return;
+    var cats=tradeCats(ls),r=bhCalcQuote(ls.map(function(l){return {category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),bhNum(D.settings['設計監工費率']||0.05));
+    box.innerHTML='<div class="trade-grid">'+cats.map(function(cat,i){var rows=ls.filter(function(l){return l['工程類別']===cat});return '<section class="trade-card"><div class="trade-title"><h4>'+esc(cat)+'</h4><span class="tag">'+(rows.length?rows.length+' 項':'尚未報價')+'</span></div><div class="trade-amount">'+(rows.length?'NT$ '+money(r.byCat[cat]):'—')+'</div><div class="row"><button class="p" data-trade-edit="'+i+'">'+(rows.length?'修改報價':'新增報價')+'</button>'+(rows.length?'<button class="s" data-trade-print="'+i+'">列印此工程</button>':'')+'</div></section>'}).join('')+'</div><div class="trade-total"><span>整案工程小計 <b>NT$ '+money(r.subtotal)+'</b></span><span>設計監工 <b>NT$ '+money(r.fee)+'</b></span><span>整案總計（未稅） <b>NT$ '+money(r.total)+'</b></span>'+(ls.length?'<button class="s" id="printAllTrades">整案報價單</button>':'')+'</div>';
+    box.querySelectorAll('[data-trade-edit]').forEach(function(b){b.onclick=function(){openEditor(q&&q['報價ID'],cats[Number(b.dataset.tradeEdit)])}});
+    box.querySelectorAll('[data-trade-print]').forEach(function(b){b.onclick=function(){openPrint(q['報價ID'],cats[Number(b.dataset.tradePrint)])}});
+    if($('#printAllTrades'))$('#printAllTrades').onclick=function(){openPrint(q['報價ID'])};
+  }).catch(function(){if($('#tradeQuotes')===box){box.textContent='工程報價讀取失敗。';var b=document.createElement('button');b.className='s';b.textContent='重新讀取';b.onclick=drawTradeQuotes;box.appendChild(b)}});
+}
+function openEditor(fromId,cat){
+  var id=S.caseId;
+  return (fromId?tradeLines(fromId):Promise.resolve([])).then(function(ls){
+    if(S.caseId!==id||S.view!=='case')return;
+    S.tradeCat=cat||BH.CATEGORIES[0];S.baseTrade=tradeFingerprint(ls,S.tradeCat);S.fromId=fromId||'';S.savingQuote=false;
+    S.lines=ls.filter(function(l){return l['工程類別']===S.tradeCat}).map(function(l){var sz=String(l['尺寸cm']||'').replace('cm','').split('×');
+      return {cat:S.tradeCat,item:l['項目'],w:sz[0]||'',h:sz[1]||'',qty:l['換算數量'],unit:l['單位'],cost:l['成本價'],price:l['報價單價'],sup:l['廠商'],note:l['備註']}});S.view='editor';render();
+  }).catch(function(){});
 }
 function vEditor(){
   var k=kase(S.caseId);
-  var h='<div class="card"><div class="card-hd"><h3>'+esc(cust(k['客戶ID'])['姓名'])+' '+k['案件ID']+' ・ 新報價'+(S.fromId?'（從 '+S.fromId+' 複製）':'')+'</h3></div><p class="muted">輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算（1尺=30.3cm、1才=30.3×30.3cm、1坪=33,058cm²）；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
+  var h='<div class="card trade-editor"><div class="card-hd"><h3>'+esc(S.tradeCat)+'・報價編輯</h3><span>'+esc(cust(k['客戶ID'])['姓名'])+' '+esc(k['案件ID'])+'</span></div><p class="muted">只編輯此工程；儲存時其他工程內容會保留。輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
   BH.CATEGORIES.map(function(c,ci){return '<datalist id="items'+ci+'">'+D.prices.filter(function(p){return p['工程類別']===c}).map(function(p){return '<option value="'+esc(p['項目'])+'">$'+p['報價單價']+'/'+p['單位']+'</option>'}).join('')+'</datalist>'}).join('')+
-  '<div class="scroll"><table class="ed"><tr><th>工程類別</th><th>項目</th><th>寬cm</th><th>高/深cm</th><th>數量</th><th>單位</th><th>成本價</th><th>報價單價</th><th class="num">小計</th><th>廠商</th><th>備註</th><th></th></tr><tbody id="lines"></tbody></table></div>'+
+  '<div class="scroll"><table class="ed"><thead><tr><th>項目</th><th>寬cm</th><th>高/深cm</th><th>數量</th><th>單位</th><th>成本價</th><th>報價單價</th><th class="num">小計</th><th>廠商</th><th>備註</th><th></th></tr></thead><tbody id="lines"></tbody></table></div>'+
   '<br><div class="row"><button class="s" onclick="addLine()">＋加一列</button></div></div>'+
-  '<div class="card"><div class="card-hd"><h3>儲存此版本</h3></div><div class="grid"><div class="kv"><label>變更說明（存成新版本）</label><input id="qnote" placeholder="例：客戶刪除吧檯，改系統櫃"></div><div class="kv"><label>狀態</label><select id="qst"><option>草稿</option><option>已送出</option></select></div></div><div class="row acts"><button class="p" onclick="saveQ()">儲存成新版本</button><button class="s" onclick="S.view=\'case\';render()">取消</button></div></div>'+
+  '<div class="card"><div class="card-hd"><h3>儲存'+esc(S.tradeCat)+'</h3></div><div class="grid"><div class="kv"><label for="qnote">本次工程變更說明</label><input id="qnote" placeholder="例：調整數量、單價或施工項目"></div></div><p class="muted">儲存後建立整案草稿版本，原有已送出／已簽約報價保留在歷史紀錄。</p><div class="row acts"><button class="p" id="saveQuoteBtn" onclick="saveQ()">儲存此工程</button><button class="s" onclick="leaveTradeEditor()">返回工程清單</button></div></div>'+
   '<div class="sum" id="sum"></div>';
   $('#app').innerHTML=h; if(!S.lines.length) addLine(); else drawLines();
 }
-function addLine(){S.lines.push({cat:BH.CATEGORIES[0],item:'',w:'',h:'',qty:'',unit:'',cost:'',price:'',sup:'',note:''});drawLines()}
+function leaveTradeEditor(){if(S.savingQuote)return;if(!confirm('返回工程清單？尚未儲存的修改將不會保留。'))return;S.view='case';render()}
+function addLine(){S.lines.push({cat:S.tradeCat,item:'',w:'',h:'',qty:'',unit:'',cost:'',price:'',sup:'',note:''});drawLines()}
 function drawLines(){
   $('#lines').innerHTML=S.lines.map(function(l,i){
     var auto=bhConvert(l.unit,l.w,l.h)!==null;
-    return '<tr><td><select onchange="upd('+i+',\'cat\',this.value)">'+BH.CATEGORIES.map(function(c){return '<option'+(c===l.cat?' selected':'')+'>'+c+'</option>'}).join('')+'</select></td>'+
-    '<td><input list="items'+BH.CATEGORIES.indexOf(l.cat)+'" style="min-width:150px" value="'+esc(l.item)+'" onchange="pick('+i+',this.value)"></td>'+
-    ['w','h'].map(function(f){return '<td><input inputmode="decimal" style="width:70px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
-    '<td><input inputmode="decimal" id="q'+i+'" style="width:70px'+(auto&&l.w?';background:#fffbe6':'')+'" value="'+esc(l.qty)+'" oninput="upd('+i+',\'qty\',this.value,1)"></td>'+
-    '<td><input style="width:50px" value="'+esc(l.unit)+'" onchange="upd('+i+',\'unit\',this.value)"></td>'+
-    ['cost','price'].map(function(f){return '<td><input inputmode="decimal" style="width:80px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
+    return '<tr>'+
+    '<td><input aria-label="項目 '+(i+1)+'" list="items'+BH.CATEGORIES.indexOf(l.cat)+'" style="min-width:150px" value="'+esc(l.item)+'" onchange="pick('+i+',this.value)"></td>'+
+    ['w','h'].map(function(f){return '<td><input aria-label="'+(f==='w'?'寬cm':'高或深cm')+' '+(i+1)+'" inputmode="decimal" style="width:70px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
+    '<td><input aria-label="數量 '+(i+1)+'" inputmode="decimal" id="q'+i+'" style="width:70px'+(auto&&l.w?';background:#fffbe6':'')+'" value="'+esc(l.qty)+'" oninput="upd('+i+',\'qty\',this.value,1)"></td>'+
+    '<td><input aria-label="單位 '+(i+1)+'" style="width:50px" value="'+esc(l.unit)+'" onchange="upd('+i+',\'unit\',this.value)"></td>'+
+    ['cost','price'].map(function(f){return '<td><input aria-label="'+(f==='cost'?'成本價':'報價單價')+' '+(i+1)+'" inputmode="decimal" style="width:80px" value="'+esc(l[f])+'" oninput="upd('+i+',\''+f+'\',this.value,1)"></td>'}).join('')+
     '<td class="num" id="s'+i+'">'+money(bhNum(l.qty)*bhNum(l.price))+'</td>'+
-    '<td><input style="width:80px" value="'+esc(l.sup)+'" onchange="upd('+i+',\'sup\',this.value)"></td><td><input style="width:100px" value="'+esc(l.note)+'" onchange="upd('+i+',\'note\',this.value)"></td>'+
-    '<td><button class="s" onclick="S.lines.splice('+i+',1);drawLines()">✕</button></td></tr>'}).join('');
+    '<td><input aria-label="廠商 '+(i+1)+'" style="width:80px" value="'+esc(l.sup)+'" onchange="upd('+i+',\'sup\',this.value)"></td><td><input aria-label="備註 '+(i+1)+'" style="width:100px" value="'+esc(l.note)+'" onchange="upd('+i+',\'note\',this.value)"></td>'+
+    '<td><button class="s" aria-label="刪除項目 '+(i+1)+'" onclick="S.lines.splice('+i+',1);drawLines()">✕</button></td></tr>'}).join('');
   sum();
 }
-function pick(i,name){var l=S.lines[i];l.item=name;var p=D.prices.filter(function(p){return p['項目']===name})[0];
+function pick(i,name){var l=S.lines[i];l.item=name;var p=D.prices.filter(function(p){return p['項目']===name&&p['工程類別']===S.tradeCat})[0];
   if(p){l.cat=p['工程類別'];l.unit=p['單位'];l.price=p['報價單價'];l.cost=p['成本價'];if(p['價格來源']==='網路行情待確認')toast('⚠ 此項為網路行情，待確認');}
   var c=bhConvert(l.unit,l.w,l.h);if(c!==null&&l.w)l.qty=c;drawLines()}
 function upd(i,f,v,live){var l=S.lines[i];l[f]=v;
@@ -852,9 +900,23 @@ function upd(i,f,v,live){var l=S.lines[i];l[f]=v;
   if(live){$('#s'+i).textContent=money(bhNum(l.qty)*bhNum(l.price));sum()}else drawLines()}
 function calc(){return bhCalcQuote(S.lines.filter(function(l){return l.item}).map(function(l){return{category:l.cat,qty:l.qty,cost:l.cost,price:l.price}}),bhNum(D.settings['設計監工費率']||0.05))}
 function sum(){var c=calc();$('#sum').innerHTML='<span>工程小計 <b>'+money(c.subtotal)+'</b></span><span>設計監工 <b>'+money(c.fee)+'</b></span><span>總計 <b>'+money(c.total)+'</b></span><span>成本 <b>'+money(c.cost)+'</b></span><span>毛利 <b class="'+(c.margin<0?'bad':'')+'">'+money(c.margin)+'（'+c.marginPct+'%）</b></span>'+(c.missingCost?'<span class="bad">'+c.missingCost+' 項缺成本價</span>':'')}
-function saveQ(){var ls=S.lines.filter(function(l){return l.item});if(!ls.length)return alert('至少要一個項目');
-  api('saveQuote',S.caseId,ls.map(function(l){return{'工程類別':l.cat,'項目':l.item,'尺寸cm':bhSizeLabel(l.w,l.h),'換算數量':bhNum(l.qty),'單位':l.unit,'成本價':l.cost,'報價單價':bhNum(l.price),'廠商':l.sup,'備註':l.note}}),$('#qnote').value,$('#qst').value)
-  .then(function(r){toast('已存成 '+r.quoteId);S.view='case';load()})}
+function saveQ(){
+  if(S.savingQuote)return;
+  var ls=S.lines.filter(function(l){return String(l.item||'').trim()});
+  if(!ls.length)return alert('至少要一個項目');
+  if(ls.some(function(l){return !Number.isFinite(Number(String(l.qty).replace(/,/g,'')))||bhNum(l.qty)<=0||String(l.price).trim()===''||!Number.isFinite(Number(String(l.price).replace(/,/g,'')))||bhNum(l.price)<0}))return alert('請填寫有效的數量（大於 0）與單價（0 或正數）');
+  var id=S.caseId,cat=S.tradeCat,note=$('#qnote').value,btn=$('#saveQuoteBtn');
+  var edited=ls.map(function(l){return{'工程類別':cat,'項目':l.item,'尺寸cm':bhSizeLabel(l.w,l.h),'換算數量':bhNum(l.qty),'單位':l.unit,'成本價':l.cost,'報價單價':bhNum(l.price),'廠商':l.sup,'備註':l.note}});
+  S.savingQuote=true;btn.disabled=true;btn.textContent='儲存中…';
+  // 重新取得最新整案，合併其他工程；同工程已被修改時保留畫面，避免覆蓋。
+  api('getAll').then(function(d){var q=latestTradeQuote(d,id);return (q?api('getQuoteLines',q['報價ID']):Promise.resolve([])).then(function(current){
+    if(tradeFingerprint(current,cat)!==S.baseTrade){alert('此工程已有其他修改，尚未儲存。請先保留目前輸入，返回工程清單重新載入後再編輯。');return null}
+    var merged=current.filter(function(l){return l['工程類別']!==cat}).concat(edited);
+    return api('saveQuote',id,merged,'【'+cat+'】'+(note||'更新工程報價'),'草稿');
+  })}).then(function(r){if(!r)return;toast(cat+'已儲存');S.view='case';return load()})
+  .catch(function(){})
+  .finally(function(){S.savingQuote=false;if($('#saveQuoteBtn')===btn){btn.disabled=false;btn.textContent='儲存此工程'}});
+}
 // ---- 單價庫 ----
 function vPrices(){
   var f=S.pf||'';
@@ -867,13 +929,13 @@ function editPrice(id){var p=Object.assign({},D.prices.filter(function(x){return
   function(o){api('savePrice',o).then(function(){toast('已儲存');S.view='prices';load()})});
   if(id){var b=document.createElement('button');b.className='s';b.textContent='刪除';b.style.color='var(--r)';b.onclick=function(){if(confirm('刪除此項目？'))api('deletePrice',id).then(function(){S.view='prices';load()})};$('#sv').parentNode.appendChild(b)}}
 // ---- 客戶版報價單（不含成本、毛利）----
-function openPrint(qid){api('getQuoteLines',qid).then(function(ls){S.pl=ls;S.qid=qid;S.view='print';render()})}
+function openPrint(qid,cat){return api('getQuoteLines',qid).then(function(ls){S.printTrade=cat||'';S.pl=cat?ls.filter(function(l){return l['工程類別']===cat}):ls;S.qid=qid;S.view='print';render()})}
 function vPrint(){
   var q=D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,rate=bhNum(st['設計監工費率']||0.05);
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
-  var cats=BH.CATEGORIES.filter(function(x){return r.byCat[x]}),pay=bhPaySchedule(r.total);
+  var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
   var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div><div class="pq">'+
-  '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' 工程預算總表</h2><div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
+  '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' '+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</h2>'+(S.printTrade?'<p>本單僅含'+esc(S.printTrade)+'，設計監工費依本工程小計計算。</p>':'')+'<div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
   '<table><tr><th>項次</th><th>品名</th><th>單位</th><th>數量</th><th class="num">總價</th><th>備註</th></tr>'+
   cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
   '<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+Math.round(rate*100)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>'+
