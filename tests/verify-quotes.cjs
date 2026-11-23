@@ -19,6 +19,11 @@ ctx.api=async function(fn,...args){
 ctx.load=async function(){};
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
+ assert.equal(ctx.quoteValidUntil('2026-11-18'),'2026-12-18');
+ assert.equal(ctx.quoteValidUntil('2026-01-31'),'2026-02-28');
+ assert.equal(ctx.quoteValidUntil('2028-01-31'),'2028-02-29');
+ assert.equal(ctx.quoteValidUntil('2026-12-15'),'2027-01-15');
+ assert.equal(ctx.quoteValidUntil('invalid'),'');
  await ctx.openEditor('DEMO-Q1','木作工程');
  assert.equal(ctx.S.lines.length,2);assert(ctx.S.lines.every(l=>l.cat==='木作工程'));
  assert(!elements.get('#app').innerHTML.includes('工程類別</th>'));
@@ -45,6 +50,7 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  ctx.vPrint();let printed=elements.get('#app').innerHTML;
  assert(printed.includes('水電工程報價單'));assert(printed.includes('插座配線'));assert(!printed.includes('收納櫃'));assert(!printed.includes('成本價'));
  assert(printed.includes('案件名稱：獨立工程報價示範'));assert(printed.includes('廠商：蜂宅室內裝修有限公司 林晉安'));assert(!printed.includes('訂單編號'));
+ assert(printed.includes('報價有效期限：2026-12-23（報價日起一個月）'));
  assert(printed.indexOf('插座配線')<printed.indexOf('工程總計（未稅）'));
  assert.equal(ctx.quotePublicSpec('防潮布、4mm夾板；公區成本×1.1'),'防潮布、4mm夾板');
  assert.equal(ctx.quotePublicSpec('瓦愣板、4mm夾板（包含弧型天花）；室內成本×1.2'),'瓦愣板、4mm夾板（包含弧型天花）');

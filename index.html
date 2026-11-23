@@ -1085,11 +1085,16 @@ function quoteDetailHtml(lines,cats){
     }).join('')}).join('');
   }).join('')+'</tbody></table>';
 }
+function quoteValidUntil(date){
+  var start=bhD(date);if(!start||!Number.isFinite(start.getTime()))return '';
+  var end=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+2,0));
+  end.setUTCDate(Math.min(start.getUTCDate(),end.getUTCDate()));return bhDs(end);
+}
 function vPrint(){
   var q=S.printQuote||D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,bankAccount=String(st['匯款帳戶']==null?'':st['匯款帳戶']),baseRate=S.printTrade?0.05:bhNum(st['設計監工費率']==null?0.05:st['設計監工費率']),rate=S.printWithFee===false?0:baseRate;
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
   var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
-  var details=quoteDetailHtml(S.pl,cats),company='蜂宅室內裝修有限公司',contact='林晉安',project=k['案名']||caseName(k,c);
+  var details=quoteDetailHtml(S.pl,cats),company='蜂宅室內裝修有限公司',contact='林晉安',project=k['案名']||caseName(k,c),validUntil=quoteValidUntil(q['日期']);
   var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="returnQuotePreview()">'+(S.printOrigin==='editor'?'返回編輯':'返回案件')+'</button></div>'+
   '<div class="noprint quote-preview-controls"><button class="s" type="button" aria-pressed="'+(S.printWithFee!==false)+'" onclick="togglePrintFee()">加收 '+bhRound(baseRate*100,2)+'% 設計監工費：'+(S.printWithFee===false?'關閉':'開啟')+'</button><span class="preview-total">未稅總計 NT$ '+money(r.total)+'</span><span class="muted">費用開關僅套用本次預覽與列印。'+(S.printOrigin==='editor'?'目前為未儲存內容，返回編輯後可儲存。':'')+'</span></div><div class="quote-paper"><article class="pq qdoc">'+
   '<div class="quote-brand"><div><div class="quote-company">'+company+'</div><h2>室內裝修工程報價單</h2><div class="quote-subtitle">'+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</div></div><img class="plogo" src="'+BH_LOGO+'" alt="蜂宅 BEE HOME"></div>'+
@@ -1100,7 +1105,7 @@ function vPrint(){
   '<section class="quote-terms"><h3>報價說明與付款約定</h3>'+
   (bankAccount&&bankAccount.indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(bankAccount)+'</p>':'')+
   '<ol><li>以上報價含施工運費，未含營業稅；含稅另計，未列項目及追加工程另行計價。</li><li>本報價單經雙方同意簽約後，依下列期別付款。</li><li>貨款未付清前屬'+company+'所有。</li><li>簽約生效後，工程限於六個月內執行；有效期後開工須重新報價。</li></ol>'+
-  '<div class="quote-payments">'+pay.map(function(p){return '<div>'+esc(p.name)+' '+p.pct+'%<b>NT$ '+money(p.amount)+'</b></div>'}).join('')+'</div><div>報價有效期限：　　　　年　　　月　　　日</div></section>'+
+  '<div class="quote-payments">'+pay.map(function(p){return '<div>'+esc(p.name)+' '+p.pct+'%<b>NT$ '+money(p.amount)+'</b></div>'}).join('')+'</div><div>報價有效期限：'+(validUntil?esc(validUntil)+'（報價日起一個月）':'請確認報價日期')+'</div></section>'+
   '<div class="quote-signatures"><div>業主簽認：<br><br>日期：</div><div>工程承攬：'+company+'<br>承辦人：'+contact+'<br>日期：</div></div><div class="quote-foot">'+company+'　｜　室內裝修工程報價</div>'+
   (S.printTrade?'':'<div class="pb"></div>'+details)+'</article></div>';
   $('#app').innerHTML=h;
