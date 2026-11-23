@@ -1031,14 +1031,15 @@ function editPrice(id){var p=Object.assign({},D.prices.filter(function(x){return
   if(id){var b=document.createElement('button');b.className='s';b.textContent='刪除';b.style.color='var(--r)';b.onclick=function(){if(confirm('刪除此項目？'))api('deletePrice',id).then(function(){S.view='prices';load()})};$('#sv').parentNode.appendChild(b)}}
 // ---- 客戶版報價單（不含成本、毛利）----
 function previewTrade(){
-  if(S.savingQuote)return;
+  if(S.savingQuote)return toast('正在儲存此工程，完成後即可預覽');
   var lines=S.lines.filter(function(l){return String(l.item||'').trim()});
   if(!lines.length)return alert('至少要一個項目才能預覽');
   if(lines.some(function(l){return !Number.isFinite(Number(String(l.qty).replace(/,/g,'')))||bhNum(l.qty)<=0||String(l.price).trim()===''||!Number.isFinite(Number(String(l.price).replace(/,/g,'')))||bhNum(l.price)<0}))return alert('請填寫有效的數量（大於 0）與單價（0 或正數）');
   S.editorNote=$('#qnote').value;S.printOrigin='editor';S.printTrade=S.tradeCat;S.printWithFee=S.tradePrintWithFee!==false;
   S.printQuote={'案件ID':S.caseId,'報價ID':'未儲存預覽','日期':D.today};
   S.pl=lines.map(function(l){return {'工程類別':S.tradeCat,'項目':l.item,'尺寸cm':bhSizeLabel(l.w,l.h),'換算數量':bhNum(l.qty),'單位':l.unit,'報價單價':bhNum(l.price),'小計':bhRound(bhNum(l.qty)*bhNum(l.price),0),'備註':l.note}});
-  S.view='print';render();
+  S.view='print';
+  try{render()}catch(e){S.view='editor';syncState('無法產生預覽：'+(e.message||e)+'。目前輸入已保留，可再次點選重試。',true,false)}
 }
 function returnQuotePreview(){S.view=S.printOrigin==='editor'?'editor':'case';render()}
 function togglePrintFee(){S.printWithFee=S.printWithFee===false;if(S.printOrigin==='editor')S.tradePrintWithFee=S.printWithFee;vPrint()}
@@ -1046,10 +1047,10 @@ function openPrint(qid,cat,button){
   if(button&&button.disabled)return Promise.resolve();
   var done=quoteButton(button,'開啟預覽中…'),id=S.caseId,view=S.view;
   return tradeLines(qid).then(function(ls){if(S.caseId!==id||S.view!==view)return;S.printOrigin='case';S.printQuote=null;S.printWithFee=true;S.printTrade=cat||'';S.pl=cat?ls.filter(function(l){return l['工程類別']===cat}):ls;S.qid=qid;S.view='print';render()})
-    .catch(function(e){if(!e.auth)syncState('報價預覽讀取失敗：'+(e.message||e)+'，可再次點選重試。',true,false)}).finally(done);
+    .catch(function(e){if(!e.auth){if(S.view==='print')S.view=view;syncState('報價預覽讀取失敗：'+(e.message||e)+'，可再次點選重試。',true,false)}}).finally(done);
 }
 function vPrint(){
-  var q=S.printQuote||D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,baseRate=S.printTrade?0.05:bhNum(st['設計監工費率']==null?0.05:st['設計監工費率']),rate=S.printWithFee===false?0:baseRate;
+  var q=S.printQuote||D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,bankAccount=String(st['匯款帳戶']==null?'':st['匯款帳戶']),baseRate=S.printTrade?0.05:bhNum(st['設計監工費率']==null?0.05:st['設計監工費率']),rate=S.printWithFee===false?0:baseRate;
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
   var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
   var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="returnQuotePreview()">'+(S.printOrigin==='editor'?'返回編輯':'返回案件')+'</button></div>'+
@@ -1059,7 +1060,7 @@ function vPrint(){
   cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
   (rate?'<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+bhRound(rate*100,2)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>':'')+
   '<tr><th colspan="4">工程總計（不含稅）</th><th class="num">'+money(r.total)+'</th><th></th></tr></table>'+
-  (st['匯款帳戶']&&st['匯款帳戶'].indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(st['匯款帳戶'])+'</p>':'')+
+  (bankAccount&&bankAccount.indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(bankAccount)+'</p>':'')+
   '<p>1. 以上報價含施工運費未稅（含稅另計），未述之項目列入追加另計。<br>2. 本報價單經雙方同意簽約後，付款方式日程如下：<br>'+pay.map(function(p){return '　'+p.name+' '+p.pct+'%　NT$'+money(p.amount)}).join('<br>')+'<br>3. 貨款未付清前屬'+esc(st['廠商署名'])+'所有。<br>4. 簽約生效後，工程限於六個月內執行，有效期後開工須重新報價。<br>※ 此報價有效期限　　年　　月　　日。</p>'+
   '<div class="hd" style="margin-top:30px"><div>客戶簽名：＿＿＿＿＿＿</div><div>廠商：'+esc(st['廠商署名'])+'</div></div>'+
   '<div class="pb"></div><h3>工程明細</h3>'+cats.map(function(x){return '<h4>'+x+'</h4><table><tr><th>項目</th><th>尺寸</th><th class="num">數量</th><th>單位</th><th class="num">單價</th><th class="num">小計</th><th>備註</th></tr>'+

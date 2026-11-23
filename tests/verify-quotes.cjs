@@ -44,6 +44,13 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  await ctx.openPrint('DEMO-Q2','水電工程');assert.equal(ctx.S.pl.length,1);
  ctx.vPrint();let printed=elements.get('#app').innerHTML;
  assert(printed.includes('水電工程報價單'));assert(printed.includes('插座配線'));assert(!printed.includes('收納櫃'));assert(!printed.includes('成本價'));
+ // Spreadsheet account settings may arrive as a number, not text. Both saved
+ // and unsaved previews must render without calling string methods on numbers.
+ ctx.D.settings['匯款帳戶']=1234567890;ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：1234567890'));
+ ctx.D.settings['匯款帳戶']='001234567890';ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：001234567890'));
+ ctx.D.settings['匯款帳戶']='請自行填寫';ctx.vPrint();assert(!elements.get('#app').innerHTML.includes('交易匯款帳戶：'));
+ ctx.D.settings['匯款帳戶']=null;ctx.vPrint();assert(!elements.get('#app').innerHTML.includes('交易匯款帳戶：'));
+ ctx.D.settings['匯款帳戶']=1234567890;
  await ctx.openPrint('DEMO-Q2');ctx.vPrint();printed=elements.get('#app').innerHTML;
  assert(printed.includes('水電工程'));assert(printed.includes('木作工程'));assert.equal(ctx.S.printTrade,'');
  // Legacy/custom and zero-price trades remain printable.
