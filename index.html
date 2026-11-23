@@ -381,6 +381,24 @@ details.card>summary{cursor:pointer;font-weight:700;padding:4px 0}details[open].
 .quote-signatures{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:30px;break-inside:avoid}.quote-signatures div{padding-top:10px;border-top:1px solid #707b82}.quote-foot{margin-top:25px;border-top:1px solid #d4d9dc;padding-top:8px;color:#68757d;font-size:11px;text-align:center}
 @media screen and (max-width:700px){.quote-paper{overflow-x:auto}.quote-paper .qdoc{min-width:720px}}
 @media print{@page quote{size:A4 portrait;margin:12mm}.qdoc{page:quote;max-width:none;padding:0;font-size:11px}.qdoc h2{font-size:21px}.qdoc .quote-detail th,.qdoc .quote-detail td{font-size:10px;padding:5px}.qdoc thead{display:table-header-group}.qdoc tr{break-inside:avoid}.qdoc .trade-group{break-after:avoid}.qdoc .quote-detail th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.quote-paper{overflow:visible}.quote-project{font-size:16px}.qdoc .quote-totals .grand th,.qdoc .quote-totals .grand td{font-size:14px}}
+@media print{
+@page quote{margin:10mm}
+.qdoc.qdoc-single{font-size:10.5px;line-height:1.4}
+.qdoc-single .quote-brand{padding-bottom:9px;margin-bottom:10px;border-bottom-width:2px}
+.qdoc-single .quote-company{font-size:13px}.qdoc-single h2{font-size:18px;letter-spacing:2px;margin-top:2px}
+.qdoc-single .quote-subtitle{font-size:10px}.qdoc-single .plogo{height:36px}
+.qdoc-single .quote-project{font-size:15px;padding-bottom:6px;margin-bottom:7px}
+.qdoc-single .quote-meta{gap:2px 16px;margin-bottom:10px}
+.qdoc.qdoc-single h3{font-size:12px;margin:10px 0 6px}
+.qdoc-single .quote-detail{margin-bottom:8px}.qdoc.qdoc-single .quote-detail th,.qdoc.qdoc-single .quote-detail td{font-size:10px;padding:3px 5px;line-height:1.4}
+.qdoc-single .quote-totals{margin:7px 0 10px auto;width:310px}.qdoc.qdoc-single .quote-totals th,.qdoc.qdoc-single .quote-totals td{padding:5px 7px}
+.qdoc.qdoc-single .quote-totals .grand th,.qdoc.qdoc-single .quote-totals .grand td{font-size:12.5px}
+.qdoc-single .quote-terms{padding-top:7px}.qdoc-single .quote-terms p{margin:5px 0}
+.qdoc-single .quote-terms ol{margin:4px 0}.qdoc-single .quote-terms li{padding:1px 0}
+.qdoc-single .quote-payments{margin:6px 0 8px}.qdoc-single .quote-payments div{padding:5px 7px}
+.qdoc-single .quote-signatures{margin-top:16px;gap:24px}.qdoc-single .quote-signatures div{padding-top:6px}
+.qdoc-single .quote-foot{margin-top:10px;padding-top:5px;font-size:9px}
+}
 </style></head><body>
 <header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> <span>CRM・報價</span></b>
 <nav class="nav"><button type="button" data-v="list">案件</button><button type="button" data-v="prices">單價庫</button></nav>
@@ -1096,7 +1114,7 @@ function vPrint(){
   var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
   var details=quoteDetailHtml(S.pl,cats),company='蜂宅室內裝修有限公司',contact='林晉安',project=k['案名']||caseName(k,c),validUntil=quoteValidUntil(q['日期']);
   var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="returnQuotePreview()">'+(S.printOrigin==='editor'?'返回編輯':'返回案件')+'</button></div>'+
-  '<div class="noprint quote-preview-controls"><button class="s" type="button" aria-pressed="'+(S.printWithFee!==false)+'" onclick="togglePrintFee()">加收 '+bhRound(baseRate*100,2)+'% 設計監工費：'+(S.printWithFee===false?'關閉':'開啟')+'</button><span class="preview-total">未稅總計 NT$ '+money(r.total)+'</span><span class="muted">費用開關僅套用本次預覽與列印。'+(S.printOrigin==='editor'?'目前為未儲存內容，返回編輯後可儲存。':'')+'</span></div><div class="quote-paper"><article class="pq qdoc">'+
+  '<div class="noprint quote-preview-controls"><button class="s" type="button" aria-pressed="'+(S.printWithFee!==false)+'" onclick="togglePrintFee()">加收 '+bhRound(baseRate*100,2)+'% 設計監工費：'+(S.printWithFee===false?'關閉':'開啟')+'</button><span class="preview-total">未稅總計 NT$ '+money(r.total)+'</span><span class="muted">費用開關僅套用本次預覽與列印。'+(S.printOrigin==='editor'?'目前為未儲存內容，返回編輯後可儲存。':'')+'</span></div><div class="quote-paper"><article class="pq qdoc'+(S.printTrade?' qdoc-single':'')+'">'+
   '<div class="quote-brand"><div><div class="quote-company">'+company+'</div><h2>室內裝修工程報價單</h2><div class="quote-subtitle">'+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</div></div><img class="plogo" src="'+BH_LOGO+'" alt="蜂宅 BEE HOME"></div>'+
   '<div class="quote-project">案件名稱：'+esc(project)+'</div><div class="quote-meta"><div>業主姓名：'+esc(c['姓名'])+'</div><div>報價日期：'+esc(q['日期'])+'</div><div class="wide">工程地址：'+esc(siteAddr(k,c))+'</div><div class="wide">廠商：'+company+' '+contact+'</div></div>'+
   (S.printTrade?details:'')+
