@@ -1053,9 +1053,12 @@ function vPrint(){
   var q=S.printQuote||D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,bankAccount=String(st['匯款帳戶']==null?'':st['匯款帳戶']),baseRate=S.printTrade?0.05:bhNum(st['設計監工費率']==null?0.05:st['設計監工費率']),rate=S.printWithFee===false?0:baseRate;
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
   var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
+  var details='<h3>工程明細</h3>'+cats.map(function(x){return '<h4>'+esc(x)+'</h4><table><tr><th>項目</th><th>尺寸</th><th class="num">數量</th><th>單位</th><th class="num">單價</th><th class="num">小計</th><th>備註</th></tr>'+
+    S.pl.filter(function(l){return l['工程類別']===x}).map(function(l){return '<tr><td>'+esc(l['項目'])+'</td><td>'+esc(l['尺寸cm'])+'</td><td class="num">'+l['換算數量']+'</td><td>'+esc(l['單位'])+'</td><td class="num">'+money(l['報價單價'])+'</td><td class="num">'+money(bhRound(bhNum(l['換算數量'])*bhNum(l['報價單價']),0))+'</td><td>'+esc(l['備註'])+'</td></tr>'}).join('')+'</table>'}).join('');
   var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="returnQuotePreview()">'+(S.printOrigin==='editor'?'返回編輯':'返回案件')+'</button></div>'+
   '<div class="noprint quote-preview-controls"><button class="s" type="button" aria-pressed="'+(S.printWithFee!==false)+'" onclick="togglePrintFee()">加收 '+bhRound(baseRate*100,2)+'% 設計監工費：'+(S.printWithFee===false?'關閉':'開啟')+'</button><span class="preview-total">未稅總計 NT$ '+money(r.total)+'</span><span class="muted">費用開關僅套用本次預覽與列印。'+(S.printOrigin==='editor'?'目前為未儲存內容，返回編輯後可儲存。':'')+'</span></div><div class="pq">'+
   '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' '+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</h2>'+(S.printTrade?'<p>本單僅含'+esc(S.printTrade)+(rate?'，設計監工費依本工程小計計算。':'，不加收設計監工費。')+'</p>':'')+'<div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
+  (S.printTrade?details:'')+
   '<table><tr><th>項次</th><th>品名</th><th>單位</th><th>數量</th><th class="num">總價</th><th>備註</th></tr>'+
   cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
   (rate?'<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+bhRound(rate*100,2)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>':'')+
@@ -1063,8 +1066,7 @@ function vPrint(){
   (bankAccount&&bankAccount.indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(bankAccount)+'</p>':'')+
   '<p>1. 以上報價含施工運費未稅（含稅另計），未述之項目列入追加另計。<br>2. 本報價單經雙方同意簽約後，付款方式日程如下：<br>'+pay.map(function(p){return '　'+p.name+' '+p.pct+'%　NT$'+money(p.amount)}).join('<br>')+'<br>3. 貨款未付清前屬'+esc(st['廠商署名'])+'所有。<br>4. 簽約生效後，工程限於六個月內執行，有效期後開工須重新報價。<br>※ 此報價有效期限　　年　　月　　日。</p>'+
   '<div class="hd" style="margin-top:30px"><div>客戶簽名：＿＿＿＿＿＿</div><div>廠商：'+esc(st['廠商署名'])+'</div></div>'+
-  '<div class="pb"></div><h3>工程明細</h3>'+cats.map(function(x){return '<h4>'+x+'</h4><table><tr><th>項目</th><th>尺寸</th><th class="num">數量</th><th>單位</th><th class="num">單價</th><th class="num">小計</th><th>備註</th></tr>'+
-    S.pl.filter(function(l){return l['工程類別']===x}).map(function(l){return '<tr><td>'+esc(l['項目'])+'</td><td>'+esc(l['尺寸cm'])+'</td><td class="num">'+l['換算數量']+'</td><td>'+esc(l['單位'])+'</td><td class="num">'+money(l['報價單價'])+'</td><td class="num">'+money(bhRound(bhNum(l['換算數量'])*bhNum(l['報價單價']),0))+'</td><td>'+esc(l['備註'])+'</td></tr>'}).join('')+'</table>'}).join('')+'</div>';
+  (S.printTrade?'':'<div class="pb"></div>'+details)+'</div>';
   $('#app').innerHTML=h;
 }
 // ---- 工期表 ----
