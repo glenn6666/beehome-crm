@@ -158,6 +158,176 @@ table{border-collapse:collapse;width:100%}
 #lgErr{color:var(--r);min-height:1.2em;font-size:14px}
 #lgUrlRow{display:flex;flex-direction:column;gap:6px}
 #ft{text-align:center;padding:10px 0 24px}#ft .out{background:none;border:0;color:#5c6570;text-decoration:underline;font-size:13px;cursor:pointer;min-height:auto;padding:6px}
+
+/* Bee Home CRM UI v3 — screen-only presentation layer. Print templates untouched. */
+@media screen {
+  :root{--y:#ffd21a;--g:#727982;--d:#202226;--r:#d93445;--bg:#f6f7f9;--ui-line:#e6e8ec;--ui-soft:#f8f9fb}
+  html{scroll-padding-top:90px}
+  body{font-family:Arial,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;background:var(--bg);color:#222831;font-size:15px;line-height:1.55}
+  header{padding:12px clamp(16px,3vw,40px);gap:18px;background:#202226;box-shadow:0 2px 12px #15181d12}
+  header .brand{gap:12px;font-size:18px;white-space:nowrap}
+  header .brand span{color:#ffd21a}
+  #hdLogo{height:38px;border-radius:7px;padding:3px 6px}
+  header .nav{margin-left:auto;background:#303238;border:1px solid #42444a;border-radius:10px;gap:3px}
+  header button[data-v]{min-height:42px;padding:8px 20px;min-width:82px;border-radius:7px}
+  header button[data-v].on{background:#ffd21a;color:#202226}
+  header .hd-add{margin-left:0}
+  main{max-width:1320px;padding:26px clamp(16px,3vw,36px) 48px}
+  .card{border:1px solid var(--ui-line);border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:0 2px 8px #18202b07,0 12px 30px #18202b04}
+  .card-hd{margin:0 0 18px;padding:0 0 15px;border-color:var(--ui-line)}
+  .card-hd h3,.card-hd b{font-size:18px;letter-spacing:0}
+  .card-hd .sub{font-weight:500;color:#6e7782}
+  .muted{color:#747d88;font-size:13px;line-height:1.7}
+  .who{padding:10px 14px;background:var(--ui-soft);border-radius:8px;margin-bottom:20px;overflow-wrap:anywhere}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:18px 22px}
+  .kv .val{font-size:15px;min-height:24px}
+  label{font-size:13px;color:#69717b;letter-spacing:0;margin-bottom:6px}
+  button.p,button.s{border-radius:9px;min-height:42px;padding:9px 15px;letter-spacing:0;transition:background .15s,border-color .15s,box-shadow .15s}
+  button.p{background:#ffd21a;color:#202226}
+  button.p:hover{background:#f3c600;filter:none}
+  button.s{border:1px solid #cbd0d6;color:#333b45}
+  button.s:hover{border-color:#87919e;background:#f6f8fa}
+  button:focus-visible,.case:focus-visible{outline:3px solid #e2aa15;outline-offset:3px}
+  input,select,textarea{border:1px solid #cfd4da;border-radius:8px;min-height:42px;padding:9px 11px;background:#fff;color:#20262d}
+  input:focus,select:focus,textarea:focus{outline:3px solid #ffd21a55;border-color:#c99f00}
+  input[type="checkbox"],input[type="radio"]{min-height:auto;accent-color:#d5a900}
+  .chips{gap:8px}
+  .chips button{min-height:40px;padding:7px 15px;border-color:#d5d9de;font-size:14px}
+  .chips button.on{background:#25282d;border-color:#25282d}
+  .case{padding:19px 22px;gap:18px;border-left-width:5px;align-items:center}
+  .case b{font-size:17px}
+  .case>div:first-child{min-width:0;overflow-wrap:anywhere}
+  .case>div:last-child{min-width:105px;flex-shrink:0}
+  .case:hover{border-color:#d9dfe5;box-shadow:0 6px 18px #18202b10}
+  .case.unpaid:hover{border-left-color:var(--r)}
+  .tag{background:#edf0f3;color:#3e4650;font-weight:600}
+  .tag.red{background:#d93445;color:white}
+  .amt{font-size:17px;font-variant-numeric:tabular-nums}
+  .stepper{gap:7px}
+  .stepper button,.stepper button:first-child,.stepper button:last-child{margin:0;border-radius:999px;padding:8px 16px;min-height:42px}
+  .stepper button.on{background:#25282d;border-color:#25282d;color:#fff;box-shadow:none}
+  .stage-wrap{border-top:1px solid var(--ui-line);padding-top:16px;margin-top:22px}
+  .scroll{max-width:100%;overflow-x:auto;overflow-y:visible;border:1px solid #e8eaee;border-radius:10px;scrollbar-color:#bfc5cd #f2f3f5;scrollbar-width:thin}
+  .card table{font-size:14px}
+  .card th,.card td{padding:12px 11px;border-bottom:1px solid #e9ebef;vertical-align:middle}
+  .card tr:first-child th{background:#f3f5f7;color:#4c5561;font-size:13px;position:static}
+  .card table>tr:nth-child(even) td,.card tbody tr:nth-child(even) td{background:#fbfcfd}
+  .card table>tr:hover td,.card tbody tr:hover td{background:#fff9e5}
+  .card table>tr:first-child:hover th,.card thead tr:hover th{background:#f3f5f7}
+  .card td button.p,.card td button.s{min-height:38px;padding:7px 11px}
+  .card td select{min-width:128px}
+  .card td input[type="date"]{min-width:170px}
+  .card td input:not([type="date"]){min-width:86px}
+  .ed{min-width:1100px}
+  .ed th,.ed td{white-space:nowrap}
+  .ed td{padding:7px 5px}
+  .ed td input,.ed td select{min-height:40px}
+  .ed td input[style*="min-width:150px"]{min-width:180px!important}
+  .sum{bottom:10px;border-radius:12px;gap:10px 22px;padding:15px 20px;background:#202226;box-shadow:0 7px 22px #0002}
+  .sum span{white-space:nowrap}
+  .sum b{font-size:17px;color:#ffd21a}
+  .toolbar{border-color:var(--ui-line);max-width:800px}
+  .toolbar.wide{max-width:1100px}
+  .crfed h4{background:#fff5c2;border-left:4px solid #e8bb00;color:#292b2f}
+  .inq-trade{border-color:var(--ui-line)}
+  .inq-trade.on{border-color:#e6bd26;background:#fffdf4}
+  .inq-thumbs .im{border-color:var(--ui-line)}
+  .alert{border-left-color:#d93445}
+  #login form{background:#fff;border:1px solid var(--ui-line);border-top:4px solid #ffd21a}
+  #toast{max-width:calc(100vw - 24px);text-align:center}
+}
+@media screen and (max-width:760px){
+  header{padding:10px 12px;gap:9px;justify-content:space-between}
+  header .brand{font-size:16px;gap:7px;min-width:0}
+  #hdLogo{height:32px;padding:2px 4px}
+  header .hd-add{margin-left:auto;min-height:40px;padding:7px 11px}
+  header .nav{order:3;width:100%;margin-left:0;display:grid;grid-template-columns:1fr 1fr}
+  header button[data-v]{width:100%;min-height:42px}
+  main{padding:14px 10px 35px}
+  .card{padding:17px 15px;border-radius:13px;margin-bottom:12px}
+  .card-hd{gap:10px;margin-bottom:15px;padding-bottom:13px}
+  .card-hd h3{font-size:17px;flex-basis:auto}
+  .card-hd .acts{width:100%;gap:8px}
+  .card-hd .acts button{flex:1 1 auto}
+  .row.acts{margin-top:14px;gap:9px}
+  .row.acts button{min-height:44px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px}
+  .kv{min-width:0}
+  .kv .val{overflow-wrap:anywhere;font-size:15px}
+  .who{font-size:13px;padding:10px 12px}
+  .chips{gap:7px}
+  .chips button{min-height:42px;padding:8px 12px;flex:0 0 auto}
+  .case{padding:16px 14px;gap:10px;align-items:flex-start}
+  .case>div:last-child{min-width:82px}
+  .case b{font-size:16px}
+  .case .muted{font-size:12px}
+  .tag{font-size:12px}
+  .stepper{gap:7px}
+  .stepper button,.stepper button:first-child,.stepper button:last-child{border-radius:9px;min-height:43px;padding:8px 12px;margin:0}
+  .scroll{position:relative;margin-right:-2px;max-width:calc(100% + 2px);overscroll-behavior-x:contain}
+  .card .scroll table:not(.ed) th,.card .scroll table:not(.ed) td{padding:9px 5px;white-space:normal;overflow-wrap:anywhere}
+  .card .scroll table td button{min-height:40px}
+  .card td select{min-width:130px}
+  .card td input[type="date"]{min-width:168px}
+  .card .scroll table.ed{min-width:1150px}
+  .card .scroll table.ed td{padding:7px 5px}
+  .card .scroll table.ed input{font-size:16px}
+  .sum{bottom:0;border-radius:11px;padding:12px 14px;gap:5px 16px;font-size:13px}
+  .sum b{font-size:15px}
+  .search{max-width:none;min-width:0;flex:1 1 100%}
+  .toolbar{margin:0 0 12px;max-width:none}
+  .inq-thumbs .im{width:calc(50% - 5px)}
+  .inq-trade{padding:12px}
+  #sAdd{flex:1 1 180px;width:auto}
+  #inqNewCat{flex:1 1 200px;max-width:none!important}
+}
+@media screen and (max-width:380px){
+  header .brand{font-size:14px}
+  .card{padding:14px 12px}
+  .grid{gap:12px 9px}
+  .case{gap:7px}
+  .case>div:last-child{min-width:75px}
+  .chips button{padding:7px 10px}
+  .sum{gap:4px 12px}
+}
+
+/* v3 corrections: screen layout only; print rules and scripts unchanged. */
+@media screen {
+  #hdLogo{background:transparent!important;border-radius:0!important;padding:0!important}
+  .card .scroll{min-width:0}
+  .card .scroll table:not(.ed){width:100%;min-width:0;table-layout:auto}
+  .card .scroll table:not(.ed) td:last-child{white-space:normal}
+  .card .scroll table:not(.ed) td:last-child button{display:inline-block;vertical-align:middle;margin:2px 1px}
+  .card .scroll table:not(.ed) td select,
+  .card .scroll table:not(.ed) td input{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+  .card .scroll table.ed{width:100%;min-width:0;table-layout:fixed;font-size:12px}
+  .card .scroll table.ed th,.card .scroll table.ed td{padding:5px 2px;white-space:nowrap;min-width:0}
+  .card .scroll table.ed th:nth-child(1){width:12%}
+  .card .scroll table.ed th:nth-child(2){width:17%}
+  .card .scroll table.ed th:nth-child(3),.card .scroll table.ed th:nth-child(4){width:7%}
+  .card .scroll table.ed th:nth-child(5){width:7%}
+  .card .scroll table.ed th:nth-child(6){width:6%}
+  .card .scroll table.ed th:nth-child(7),.card .scroll table.ed th:nth-child(8){width:8%}
+  .card .scroll table.ed th:nth-child(9){width:7%}
+  .card .scroll table.ed th:nth-child(10){width:8%}
+  .card .scroll table.ed th:nth-child(11){width:9%}
+  .card .scroll table.ed th:nth-child(12){width:4%}
+  .card .scroll table.ed td input,.card .scroll table.ed td select,
+  .card .scroll table.ed td input[style]{width:100%!important;min-width:0!important;max-width:100%;padding:6px 3px;font-size:12px}
+  .card .scroll table.ed td button{min-width:0;padding:5px 4px;font-size:12px}
+}
+@media screen and (max-width:760px){
+  .card .scroll table:not(.ed){width:100%;min-width:0;table-layout:fixed;font-size:12px}
+  .card .scroll table:not(.ed) th,.card .scroll table:not(.ed) td{padding:8px 4px;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+  .card .scroll table:not(.ed) td button.p,.card .scroll table:not(.ed) td button.s{font-size:12px;padding:5px 6px;min-height:34px;white-space:nowrap}
+  .card .scroll table:not(.ed) td select,.card .scroll table:not(.ed) td input{min-width:0!important;width:100%;padding:5px 2px;font-size:12px;min-height:36px}
+  .card .scroll table:not(.ed) td input[type=date]{font-size:11px}
+  .card .scroll table:not(.ed) td input[style]{max-width:100%!important}
+  .card .scroll table.ed{min-width:1080px;table-layout:fixed}
+  .stepper{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+  .stepper button,.stepper button:first-child,.stepper button:last-child{padding:7px 2px;min-width:0;white-space:nowrap;font-size:12px}
+  .grid:has(#qnote):has(#qst){grid-template-columns:minmax(0,1fr)}
+}
 </style></head><body>
 <header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> <span>CRM・報價</span></b>
 <nav class="nav"><button type="button" data-v="list">案件</button><button type="button" data-v="prices">單價庫</button></nav>
