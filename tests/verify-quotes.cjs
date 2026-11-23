@@ -44,6 +44,15 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  await ctx.openPrint('DEMO-Q2','水電工程');assert.equal(ctx.S.pl.length,1);
  ctx.vPrint();let printed=elements.get('#app').innerHTML;
  assert(printed.includes('水電工程報價單'));assert(printed.includes('插座配線'));assert(!printed.includes('收納櫃'));assert(!printed.includes('成本價'));
+ assert(printed.includes('案件名稱：獨立工程報價示範'));assert(printed.includes('廠商：蜂宅室內裝修有限公司 林晉安'));assert(!printed.includes('訂單編號'));
+ assert(printed.indexOf('插座配線')<printed.indexOf('工程總計（未稅）'));
+ assert.equal(ctx.quotePublicSpec('防潮布、4mm夾板；公區成本×1.1'),'防潮布、4mm夾板');
+ assert.equal(ctx.quotePublicSpec('瓦愣板、4mm夾板（包含弧型天花）；室內成本×1.2'),'瓦愣板、4mm夾板（包含弧型天花）');
+ assert.equal(ctx.quotePublicSpec('規格30×40cm（成本800）；毛利20%；單價=800*1.1'),'規格30×40cm');
+ assert.equal(ctx.quotePublicSpec('防潮布 公區成本×1.1'),'防潮布');
+ const protection=[{'工程類別':'保護工程','項目':'公共區域地坪保護','備註':'防潮布、4mm夾板；公區成本×1.1','換算數量':9,'單位':'坪','報價單價':880},{'工程類別':'保護工程','項目':'大門保護','備註':'門框木心板；室內成本×1.2','換算數量':1,'單位':'式','報價單價':6000}];
+ const original=JSON.stringify(protection),detail=ctx.quoteDetailHtml(protection,['保護工程']);
+ assert(detail.includes('公共區域保護工程'));assert(detail.includes('室內保護工程'));assert(detail.indexOf('公共區域地坪保護')<detail.indexOf('室內保護工程'));assert(!detail.includes('成本'));assert(detail.includes('防潮布、4mm夾板'));assert.equal(JSON.stringify(protection),original);
  // Spreadsheet account settings may arrive as a number, not text. Both saved
  // and unsaved previews must render without calling string methods on numbers.
  ctx.D.settings['匯款帳戶']=1234567890;ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：1234567890'));
@@ -62,9 +71,9 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  ctx.S.lines[0].price=2000;elements.get('#qnote').value='保留未儲存說明';
  const previewApi=ctx.api;ctx.api=()=>{throw Error('Preview must not call the API')};
  ctx.previewTrade();assert.equal(ctx.S.view,'print');assert.equal(ctx.S.printOrigin,'editor');
- printed=elements.get('#app').innerHTML;assert(printed.includes('水電工程報價單'));assert(printed.includes('6,300'));assert(printed.includes('設計及監工費用5%'));
+ printed=elements.get('#app').innerHTML;assert(printed.includes('水電工程報價單'));assert(printed.includes('6,300'));assert(printed.includes('設計監工費 5%'));
  assert(!printed.includes('成本價'));assert(!printed.includes('毛利'));
- ctx.togglePrintFee();printed=elements.get('#app').innerHTML;assert(printed.includes('6,000'));assert(!printed.includes('設計及監工費用5%'));assert(printed.includes('不加收設計監工費'));
+ ctx.togglePrintFee();printed=elements.get('#app').innerHTML;assert(printed.includes('6,000'));assert(!printed.includes('設計監工費 5%'));assert(printed.includes('不加收設計監工費'));
  ctx.returnQuotePreview();assert.equal(ctx.S.view,'editor');assert.equal(ctx.S.lines[0].price,2000);assert.equal(ctx.S.editorNote,'保留未儲存說明');
  ctx.previewTrade();assert.equal(ctx.S.printWithFee,false);ctx.togglePrintFee();assert.equal(ctx.S.printWithFee,true);
  ctx.returnQuotePreview();ctx.api=previewApi;
