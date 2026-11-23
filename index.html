@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><title>蜂宅 CRM・報價</title><meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <style>
 :root{--y:#f6c445;--g:#888;--d:#222;--r:#d9363e;--bg:#f3f0e8}
 *{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif;background:var(--bg);color:var(--d);font-size:15px}
@@ -27,6 +29,13 @@ table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #eee;pad
 .sum{position:sticky;bottom:0;background:#222;color:#fff;border-radius:10px;padding:10px;display:flex;gap:16px;flex-wrap:wrap}
 .sum b{color:var(--y)}.bad{color:#ff8a8a!important}
 .web{background:#fff3cd}
+.sync-bar{max-width:1100px;margin:10px auto 0;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:#555}
+.sync-bar[hidden]{display:none}.sync-bar.error{color:#a0222a}.sync-bar button{flex-shrink:0}
+.loading-card{padding:28px;line-height:1.8}.loading-card p{margin:6px 0;color:#626b76}
+.quote-preview-controls{max-width:800px;margin:0 auto 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.quote-preview-controls button[aria-pressed=true]{background:#fff1ba;border-color:#b78b00;color:#332700}
+.quote-preview-controls .preview-total{margin-left:auto;font-size:18px;font-weight:700}
+@media print{.sync-bar{display:none!important}}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:20px;display:none;z-index:9}
 /* 列印報價單 */
 .pq{background:#fff;padding:24px;max-width:800px;margin:auto;font-size:14px}
@@ -359,6 +368,7 @@ details.card>summary{cursor:pointer;font-weight:700;padding:4px 0}details[open].
 <header><b class="brand"><img id="hdLogo" alt="蜂宅 BEE HOME"> <span>CRM・報價</span></b>
 <nav class="nav"><button type="button" data-v="list">案件</button><button type="button" data-v="prices">單價庫</button></nav>
 <button type="button" class="p hd-add" onclick="newCustomer()">＋客戶</button></header>
+<aside id="syncBar" class="sync-bar noprint" role="status" aria-live="polite" hidden><span id="syncText"></span><button id="syncRetry" class="s" onclick="load({background:true}).catch(function(){})">更新資料</button></aside>
 <main id="app"></main><footer id="ft" class="noprint"><button class="out" onclick="logout()">登出這台裝置</button></footer><div id="login"><form id="lgForm" class="card"><img id="lgLogo" alt="蜂宅 BEE HOME"><h3>蜂宅 CRM・報價</h3>
 <div id="lgUrlRow"><label>Apps Script 網址（只要貼一次）</label><input id="lgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></div>
 <label>密碼</label><input id="lgPw" type="password" autocomplete="current-password">
@@ -751,16 +761,41 @@ function toast(m){var t=$('#toast');t.textContent=m;t.style.display='block';setT
 // 部署後的 Apps Script 網址；留空時在登入畫面貼上一次即可（存在這台裝置）
 var API_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyfAxoHYI9FbyxKaYI7NyoacJNKbn5pnJRJYdMVg08N_nqEVy6bzlUypevj23SHFfLW/exec';
 var K_URL='bhCrmApiUrl',K_TOK='bhCrmToken';
+var K_DATA_CACHE='bhCrmDataSessionV1',DATA_CACHE_TTL=15*60*1000,dataEpoch=0,screenRevision=0,screenIsForm=false,loadPending=null;
 function apiUrl(){return API_URL_DEFAULT||localStorage.getItem(K_URL)||''}
+function clearDataCache(){dataEpoch++;try{sessionStorage.removeItem(K_DATA_CACHE)}catch(e){}}
+async function cacheContext(token,url){
+  var digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(url+'\n'+token));
+  return Array.from(new Uint8Array(digest)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+}
+function validData(d){return d&&['customers','cases','quotes','payments','prices'].every(function(k){return Array.isArray(d[k])})&&d.settings&&typeof d.settings==='object'}
+async function readDataCache(token,url){try{
+  var entry=JSON.parse(sessionStorage.getItem(K_DATA_CACHE)||'null');
+  if(!entry)return null;
+  if(!Number.isFinite(entry.savedAt)||Date.now()-entry.savedAt<0||Date.now()-entry.savedAt>DATA_CACHE_TTL||!validData(entry.data)||entry.context!==await cacheContext(token,url)){sessionStorage.removeItem(K_DATA_CACHE);return null}
+  return entry;
+}catch(e){return null}}
+async function writeDataCache(d,token,url,epoch){try{
+  var context=await cacheContext(token,url);
+  if(epoch!==dataEpoch||token!==localStorage.getItem(K_TOK)||url!==apiUrl())return;
+  sessionStorage.setItem(K_DATA_CACHE,JSON.stringify({context:context,savedAt:Date.now(),data:d}));
+}catch(e){/* 快取不可用時仍照常顯示線上資料。 */}}
+function syncState(text,failed,busy){
+  $('#syncBar').hidden=false;$('#syncBar').classList.toggle('error',!!failed);$('#syncText').textContent=text;
+  $('#syncRetry').disabled=!!busy;$('#syncRetry').textContent=busy?'更新中…':failed?'重新讀取':'更新資料';
+}
+function loadingView(){$('#app').innerHTML='<div class="card loading-card"><b>正在讀取案件資料…</b><p>首次開啟需連線 Google 試算表，請稍候。</p></div>'}
 function post(body){var u=apiUrl();if(!u)return Promise.reject(new Error('尚未設定 Apps Script 網址'));
   return fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'})
     .then(function(r){if(!r.ok)throw new Error('連線失敗（HTTP '+r.status+'）');return r.text()})
     .then(function(t){try{return JSON.parse(t)}catch(e){throw new Error('伺服器回應格式不對：請確認網址是 /exec 結尾，且部署時存取權選「任何人」')}})}
-function api(fn){var a=[].slice.call(arguments,1);
-  return post({action:'call',fn:fn,args:a,token:localStorage.getItem(K_TOK)||''}).then(function(j){
-    if(j.ok)return j.result;
-    if(j.error==='auth'){localStorage.removeItem(K_TOK);showLogin('登入已過期，請重新輸入密碼');var e=new Error('auth');e.auth=1;throw e}
-    throw new Error(j.error||'發生錯誤')}).catch(function(e){if(!e.auth)alert(e.message||e);throw e})}
+function api(fn){return callApi(fn,[].slice.call(arguments,1),false)}
+function callApi(fn,a,quiet){var token=localStorage.getItem(K_TOK)||'',mutation=!/^get/.test(fn);
+  if(mutation){clearDataCache();if(loadPending)syncState('資料變更中…',false,false)}
+  return post({action:'call',fn:fn,args:a,token:token}).then(function(j){
+    if(j.ok){if(mutation)clearDataCache();return j.result}
+    if(j.error==='auth'){if(token===(localStorage.getItem(K_TOK)||'')){localStorage.removeItem(K_TOK);clearDataCache();D=null;S.quoteCache={};$('#app').textContent='';$('#syncBar').hidden=true;showLogin('登入已過期，請重新輸入密碼')}var e=new Error('auth');e.auth=1;throw e}
+    throw new Error(j.error||'發生錯誤')}).catch(function(e){if(!e.auth&&!quiet)alert(e.message||e);throw e})}
 function showLogin(msg){$('#login').style.display='flex';$('#lgUrlRow').style.display=API_URL_DEFAULT?'none':'';
   $('#lgUrl').value=apiUrl();$('#lgErr').textContent=msg||'';$('#lgPw').value='';setTimeout(function(){(apiUrl()?$('#lgPw'):$('#lgUrl')).focus()},50)}
 function doLogin(ev){ev.preventDefault();var u=$('#lgUrl').value.trim(),err=$('#lgErr');
@@ -768,18 +803,47 @@ function doLogin(ev){ev.preventDefault();var u=$('#lgUrl').value.trim(),err=$('#
   err.textContent='登入中…';$('#lgBtn').disabled=true;
   post({action:'login',password:$('#lgPw').value}).then(function(j){
     if(!j.ok)throw new Error(j.error||'登入失敗');
-    localStorage.setItem(K_TOK,j.token);$('#login').style.display='none';$('#app').textContent='載入中…';return load()})
+    clearDataCache();localStorage.setItem(K_TOK,j.token);S.view='list';$('#login').style.display='none';return load()})
   .catch(function(e){err.textContent=e.message||String(e)}).then(function(){$('#lgBtn').disabled=false})}
-function logout(){if(!confirm('登出這台裝置？'))return;localStorage.removeItem(K_TOK);D=null;$('#app').textContent='';showLogin('')}
+function logout(){if(!confirm('登出這台裝置？'))return;localStorage.removeItem(K_TOK);clearDataCache();D=null;S.quoteCache={};$('#app').textContent='';$('#syncBar').hidden=true;showLogin('')}
 function boot(){$('#lgForm').onsubmit=doLogin;
-  if(apiUrl()&&localStorage.getItem(K_TOK))load().catch(function(e){if(!e.auth)$('#app').textContent='載入失敗：'+(e.message||e)});else showLogin('')}
-function load(){return api('getAll').then(function(d){D=d;S.quoteCache={};render()})}
-document.querySelectorAll('header button[data-v]').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;render()}});
+  if(apiUrl()&&localStorage.getItem(K_TOK))return load({restoreCache:true,background:true}).catch(function(){});
+  clearDataCache();showLogin('')}
+function load(options){
+  var opt=options||{},token=localStorage.getItem(K_TOK)||'',url=apiUrl(),epoch=dataEpoch;
+  if(loadPending&&loadPending.epoch===epoch&&loadPending.token===token&&loadPending.url===url)return loadPending.promise;
+  if(!D)loadingView();
+  syncState('正在讀取最新資料…',false,true);
+  var revision=screenRevision,job={epoch:epoch,token:token,url:url};
+  function current(){return epoch===dataEpoch&&token===(localStorage.getItem(K_TOK)||'')&&url===apiUrl()}
+  // 網路與快取平行讀取；網路較快時不會被舊快取蓋回去。
+  var cached=opt.restoreCache?readDataCache(token,url).then(function(entry){
+    if(!entry||D||!current())return;
+    D=entry.data;render();revision=screenRevision;
+    syncState('已顯示此分頁近期資料，正在背景更新…',false,true);
+  }):Promise.resolve();
+  job.promise=callApi('getAll',[],true).then(function(d){
+    if(!current())return;
+    if(!validData(d))throw new Error('伺服器資料格式不完整');
+    D=d;S.quoteCache={};writeDataCache(d,token,url,epoch);
+    // 更新途中若已進入表單，不重畫，保留使用者正在輸入的內容。
+    if(!opt.background||revision===screenRevision&&!screenIsForm&&(S.view==='list'||S.view==='prices'))render();
+    syncState('資料已更新',false,false);
+  }).catch(async function(e){
+    await cached;
+    if(!current()||e.auth)throw e;
+    syncState(D?'更新失敗，目前顯示先前資料；請重新讀取後再修改。':'資料讀取失敗：'+(e.message||e),true,false);
+    throw e;
+  }).finally(function(){if(loadPending===job)loadPending=null});
+  loadPending=job;return job.promise;
+}
+document.querySelectorAll('header button[data-v]').forEach(function(b){b.onclick=function(){if(!D)return toast('資料讀取中，請稍候');S.view=b.dataset.v;render()}});
 function cust(id){return D.customers.filter(function(c){return c['客戶ID']===id})[0]||{}}
 function kase(id){return D.cases.filter(function(c){return c['案件ID']===id})[0]}
 function pays(id){return D.payments.filter(function(p){return p['案件ID']===id})}
 function unpaid(id){return pays(id).some(function(p){return bhNum(p['餘額'])>0&&p['應收日期']&&p['應收日期']<=D.today})}
 function render(){
+  screenRevision++;screenIsForm=false;
   document.querySelectorAll('header button[data-v]').forEach(function(b){b.classList.toggle('on',b.dataset.v===S.view)});
   ({list:vList,case:vCase,editor:vEditor,prices:vPrices,print:vPrint,sched:vSched,schedPrint:vSchedPrint,contract:vContract,ctEdit:vCtEdit,crf:vCrf,crfPrint:vCrfPrint,inquiry:vInquiry,inquiryPrint:vInquiryPrint})[S.view]();
   window.scrollTo(0,0);
@@ -801,6 +865,8 @@ function vList(){
   $('#app').innerHTML=h;
 }
 function form(title,fields,obj,onsave){
+  if(!D)return toast('資料讀取中，請稍候');
+  screenRevision++;screenIsForm=true;
   $('#app').innerHTML='<div class="card"><div class="card-hd"><h3>'+title+'</h3></div><div class="grid">'+fields.map(function(f){var k=f[0],v=obj[k]==null?'':obj[k];
     var inp=f[1]?'<select data-k="'+k+'">'+f[1].map(function(o){return '<option'+(o==v?' selected':'')+'>'+o+'</option>'}).join('')+'</select>':'<input data-k="'+k+'" value="'+esc(v)+'">';
     return '<div class="kv"><label>'+k+'</label>'+inp+'</div>'}).join('')+'</div><div class="row acts"><button class="p" id="sv">儲存</button><button class="s" onclick="render()">取消</button></div></div>';
@@ -809,7 +875,7 @@ function form(title,fields,obj,onsave){
 // 施工地址：案件有填用案件的，否則用客戶地址
 function siteAddr(k,c){return (k&&k['地址'])||(c&&c['地址'])||''}
 var CF=[['姓名'],['電話'],['LINE'],['Email'],['地址'],['來源',['','官網','LINE','Threads','IG','FB','介紹','其他']],['備註']];
-function newCustomer(){form('新增客戶',CF,{},function(o){api('saveCustomer',o).then(function(c){toast('已新增 '+c['客戶ID']);return load().then(function(){newCase(c['客戶ID'])})})})}
+function newCustomer(){if(!D)return toast('資料讀取中，請稍候');form('新增客戶',CF,{},function(o){api('saveCustomer',o).then(function(c){toast('已新增 '+c['客戶ID']);return load().then(function(){newCase(c['客戶ID'])})})})}
 function editCustomer(id){form('編輯客戶 '+id,CF,Object.assign({},cust(id)),function(o){api('saveCustomer',o).then(function(){toast('已儲存');load()})})}
 var KF=[['案名'],['地址'],['坪數'],['屋況',['','新成屋','預售屋','中古屋','老屋翻新','商空']],['風格'],['階段',BH.STAGES],['負責人'],['合約總價']];
 function newCase(cid){S.view='list';form('新增案件（'+esc(cust(cid)['姓名'])+'）',KF,{'客戶ID':cid,'地址':cust(cid)['地址']||''},function(o){api('saveCase',o).then(function(k){toast('已新增 '+k['案件ID']);S.caseId=k['案件ID'];S.view='case';load()})})}
@@ -860,18 +926,18 @@ function openEditor(fromId,cat){
   var id=S.caseId;
   return (fromId?tradeLines(fromId):Promise.resolve([])).then(function(ls){
     if(S.caseId!==id||S.view!=='case')return;
-    S.tradeCat=cat||BH.CATEGORIES[0];S.baseTrade=tradeFingerprint(ls,S.tradeCat);S.fromId=fromId||'';S.savingQuote=false;
+    S.tradeCat=cat||BH.CATEGORIES[0];S.baseTrade=tradeFingerprint(ls,S.tradeCat);S.fromId=fromId||'';S.savingQuote=false;S.editorNote='';S.tradePrintWithFee=true;
     S.lines=ls.filter(function(l){return l['工程類別']===S.tradeCat}).map(function(l){var sz=String(l['尺寸cm']||'').replace('cm','').split('×');
       return {cat:S.tradeCat,item:l['項目'],w:sz[0]||'',h:sz[1]||'',qty:l['換算數量'],unit:l['單位'],cost:l['成本價'],price:l['報價單價'],sup:l['廠商'],note:l['備註']}});S.view='editor';render();
   }).catch(function(){});
 }
 function vEditor(){
   var k=kase(S.caseId);
-  var h='<div class="card trade-editor"><div class="card-hd"><h3>'+esc(S.tradeCat)+'・報價編輯</h3><span>'+esc(cust(k['客戶ID'])['姓名'])+' '+esc(k['案件ID'])+'</span></div><p class="muted">只編輯此工程；儲存時其他工程內容會保留。輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
+  var h='<div class="card trade-editor"><div class="card-hd"><h3>'+esc(S.tradeCat)+'・報價編輯</h3><span>'+esc(cust(k['客戶ID'])['姓名'])+' '+esc(k['案件ID'])+'</span><div class="acts"><button class="p" onclick="previewTrade()">預覽／列印此工程</button></div></div><p class="muted">只編輯此工程；儲存時其他工程內容會保留。輸入寬（cm），單位是 坪／才／m² 時再填高或深，數量自動換算；個／組／式請直接填數量。成本價空白時毛利不準。</p>'+
   BH.CATEGORIES.map(function(c,ci){return '<datalist id="items'+ci+'">'+D.prices.filter(function(p){return p['工程類別']===c}).map(function(p){return '<option value="'+esc(p['項目'])+'">$'+p['報價單價']+'/'+p['單位']+'</option>'}).join('')+'</datalist>'}).join('')+
   '<div class="scroll"><table class="ed"><thead><tr><th>項目</th><th>寬cm</th><th>高/深cm</th><th>數量</th><th>單位</th><th>成本價</th><th>報價單價</th><th class="num">小計</th><th>廠商</th><th>備註</th><th></th></tr></thead><tbody id="lines"></tbody></table></div>'+
   '<br><div class="row"><button class="s" onclick="addLine()">＋加一列</button></div></div>'+
-  '<div class="card"><div class="card-hd"><h3>儲存'+esc(S.tradeCat)+'</h3></div><div class="grid"><div class="kv"><label for="qnote">本次工程變更說明</label><input id="qnote" placeholder="例：調整數量、單價或施工項目"></div></div><p class="muted">儲存後建立整案草稿版本，原有已送出／已簽約報價保留在歷史紀錄。</p><div class="row acts"><button class="p" id="saveQuoteBtn" onclick="saveQ()">儲存此工程</button><button class="s" onclick="leaveTradeEditor()">返回工程清單</button></div></div>'+
+  '<div class="card"><div class="card-hd"><h3>儲存'+esc(S.tradeCat)+'</h3></div><div class="grid"><div class="kv"><label for="qnote">本次工程變更說明</label><input id="qnote" value="'+esc(S.editorNote||'')+'" oninput="S.editorNote=this.value" placeholder="例：調整數量、單價或施工項目"></div></div><p class="muted">儲存後建立整案草稿版本，原有已送出／已簽約報價保留在歷史紀錄。</p><div class="row acts"><button class="p" id="saveQuoteBtn" onclick="saveQ()">儲存此工程</button><button class="s" onclick="leaveTradeEditor()">返回工程清單</button></div></div>'+
   '<div class="sum" id="sum"></div>';
   $('#app').innerHTML=h; if(!S.lines.length) addLine(); else drawLines();
 }
@@ -929,22 +995,35 @@ function editPrice(id){var p=Object.assign({},D.prices.filter(function(x){return
   function(o){api('savePrice',o).then(function(){toast('已儲存');S.view='prices';load()})});
   if(id){var b=document.createElement('button');b.className='s';b.textContent='刪除';b.style.color='var(--r)';b.onclick=function(){if(confirm('刪除此項目？'))api('deletePrice',id).then(function(){S.view='prices';load()})};$('#sv').parentNode.appendChild(b)}}
 // ---- 客戶版報價單（不含成本、毛利）----
-function openPrint(qid,cat){return api('getQuoteLines',qid).then(function(ls){S.printTrade=cat||'';S.pl=cat?ls.filter(function(l){return l['工程類別']===cat}):ls;S.qid=qid;S.view='print';render()})}
+function previewTrade(){
+  if(S.savingQuote)return;
+  var lines=S.lines.filter(function(l){return String(l.item||'').trim()});
+  if(!lines.length)return alert('至少要一個項目才能預覽');
+  if(lines.some(function(l){return !Number.isFinite(Number(String(l.qty).replace(/,/g,'')))||bhNum(l.qty)<=0||String(l.price).trim()===''||!Number.isFinite(Number(String(l.price).replace(/,/g,'')))||bhNum(l.price)<0}))return alert('請填寫有效的數量（大於 0）與單價（0 或正數）');
+  S.editorNote=$('#qnote').value;S.printOrigin='editor';S.printTrade=S.tradeCat;S.printWithFee=S.tradePrintWithFee!==false;
+  S.printQuote={'案件ID':S.caseId,'報價ID':'未儲存預覽','日期':D.today};
+  S.pl=lines.map(function(l){return {'工程類別':S.tradeCat,'項目':l.item,'尺寸cm':bhSizeLabel(l.w,l.h),'換算數量':bhNum(l.qty),'單位':l.unit,'報價單價':bhNum(l.price),'小計':bhRound(bhNum(l.qty)*bhNum(l.price),0),'備註':l.note}});
+  S.view='print';render();
+}
+function returnQuotePreview(){S.view=S.printOrigin==='editor'?'editor':'case';render()}
+function togglePrintFee(){S.printWithFee=S.printWithFee===false;if(S.printOrigin==='editor')S.tradePrintWithFee=S.printWithFee;vPrint()}
+function openPrint(qid,cat){return tradeLines(qid).then(function(ls){S.printOrigin='case';S.printQuote=null;S.printWithFee=true;S.printTrade=cat||'';S.pl=cat?ls.filter(function(l){return l['工程類別']===cat}):ls;S.qid=qid;S.view='print';render()})}
 function vPrint(){
-  var q=D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,rate=bhNum(st['設計監工費率']||0.05);
+  var q=S.printQuote||D.quotes.filter(function(x){return x['報價ID']===S.qid})[0],k=kase(q['案件ID']),c=cust(k['客戶ID']),st=D.settings,baseRate=S.printTrade?0.05:bhNum(st['設計監工費率']==null?0.05:st['設計監工費率']),rate=S.printWithFee===false?0:baseRate;
   var r=bhCalcQuote(S.pl.map(function(l){return{category:l['工程類別'],qty:l['換算數量'],price:l['報價單價']}}),rate);
   var cats=tradeCats(S.pl).filter(function(x){return S.pl.some(function(l){return l['工程類別']===x})}),pay=bhPaySchedule(r.total);
-  var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="S.view=\'case\';render()">返回</button></div><div class="pq">'+
-  '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' '+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</h2>'+(S.printTrade?'<p>本單僅含'+esc(S.printTrade)+'，設計監工費依本工程小計計算。</p>':'')+'<div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
+  var h='<div class="noprint toolbar"><button class="p" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="s" onclick="returnQuotePreview()">'+(S.printOrigin==='editor'?'返回編輯':'返回案件')+'</button></div>'+
+  '<div class="noprint quote-preview-controls"><button class="s" type="button" aria-pressed="'+(S.printWithFee!==false)+'" onclick="togglePrintFee()">加收 '+bhRound(baseRate*100,2)+'% 設計監工費：'+(S.printWithFee===false?'關閉':'開啟')+'</button><span class="preview-total">未稅總計 NT$ '+money(r.total)+'</span><span class="muted">費用開關僅套用本次預覽與列印。'+(S.printOrigin==='editor'?'目前為未儲存內容，返回編輯後可儲存。':'')+'</span></div><div class="pq">'+
+  '<img class="plogo" src="'+BH_LOGO+'"><h2>'+esc(siteAddr(k,c))+' '+esc(S.printTrade?S.printTrade+'報價單':'工程預算總表')+'</h2>'+(S.printTrade?'<p>本單僅含'+esc(S.printTrade)+(rate?'，設計監工費依本工程小計計算。':'，不加收設計監工費。')+'</p>':'')+'<div class="hd"><div>客戶編號：'+c['客戶ID']+'</div><div>客戶名稱：'+esc(c['姓名'])+'</div><div>工程地址：'+esc(siteAddr(k,c))+'</div><div>訂單編號：'+q['報價ID']+'</div><div>廠商：'+esc(st['公司名稱'])+' '+esc(st['廠商署名'])+'</div><div>報價日期：'+q['日期']+'</div></div>'+
   '<table><tr><th>項次</th><th>品名</th><th>單位</th><th>數量</th><th class="num">總價</th><th>備註</th></tr>'+
   cats.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+x+'</td><td>式</td><td></td><td class="num">'+money(r.byCat[x])+'</td><td></td></tr>'}).join('')+
-  '<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+Math.round(rate*100)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>'+
+  (rate?'<tr><td>'+(cats.length+1)+'</td><td>設計及監工費用'+bhRound(rate*100,2)+'%</td><td>式</td><td></td><td class="num">'+money(r.fee)+'</td><td></td></tr>':'')+
   '<tr><th colspan="4">工程總計（不含稅）</th><th class="num">'+money(r.total)+'</th><th></th></tr></table>'+
   (st['匯款帳戶']&&st['匯款帳戶'].indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(st['匯款帳戶'])+'</p>':'')+
   '<p>1. 以上報價含施工運費未稅（含稅另計），未述之項目列入追加另計。<br>2. 本報價單經雙方同意簽約後，付款方式日程如下：<br>'+pay.map(function(p){return '　'+p.name+' '+p.pct+'%　NT$'+money(p.amount)}).join('<br>')+'<br>3. 貨款未付清前屬'+esc(st['廠商署名'])+'所有。<br>4. 簽約生效後，工程限於六個月內執行，有效期後開工須重新報價。<br>※ 此報價有效期限　　年　　月　　日。</p>'+
   '<div class="hd" style="margin-top:30px"><div>客戶簽名：＿＿＿＿＿＿</div><div>廠商：'+esc(st['廠商署名'])+'</div></div>'+
   '<div class="pb"></div><h3>工程明細</h3>'+cats.map(function(x){return '<h4>'+x+'</h4><table><tr><th>項目</th><th>尺寸</th><th class="num">數量</th><th>單位</th><th class="num">單價</th><th class="num">小計</th><th>備註</th></tr>'+
-    S.pl.filter(function(l){return l['工程類別']===x}).map(function(l){return '<tr><td>'+esc(l['項目'])+'</td><td>'+esc(l['尺寸cm'])+'</td><td class="num">'+l['換算數量']+'</td><td>'+esc(l['單位'])+'</td><td class="num">'+money(l['報價單價'])+'</td><td class="num">'+money(l['小計'])+'</td><td>'+esc(l['備註'])+'</td></tr>'}).join('')+'</table>'}).join('')+'</div>';
+    S.pl.filter(function(l){return l['工程類別']===x}).map(function(l){return '<tr><td>'+esc(l['項目'])+'</td><td>'+esc(l['尺寸cm'])+'</td><td class="num">'+l['換算數量']+'</td><td>'+esc(l['單位'])+'</td><td class="num">'+money(l['報價單價'])+'</td><td class="num">'+money(bhRound(bhNum(l['換算數量'])*bhNum(l['報價單價']),0))+'</td><td>'+esc(l['備註'])+'</td></tr>'}).join('')+'</table>'}).join('')+'</div>';
   $('#app').innerHTML=h;
 }
 // ---- 工期表 ----

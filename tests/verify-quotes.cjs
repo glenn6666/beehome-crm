@@ -50,7 +50,18 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  ctx.S.pl=[{'工程類別':'自訂工程','項目':'免費項目','換算數量':1,'報價單價':0,'小計':0}];ctx.vPrint();assert(elements.get('#app').innerHTML.includes('自訂工程'));
  // Failed network writes leave the editor available for retry.
  ctx.S.view='case';ctx.S.quoteCache={};await ctx.openEditor('DEMO-Q2','水電工程');
+ // Preview uses unsaved editor rows without another API request; the fee switch
+ // changes totals and hides the fee row, while retaining drafts on return.
+ ctx.S.lines[0].price=2000;elements.get('#qnote').value='保留未儲存說明';
+ const previewApi=ctx.api;ctx.api=()=>{throw Error('Preview must not call the API')};
+ ctx.previewTrade();assert.equal(ctx.S.view,'print');assert.equal(ctx.S.printOrigin,'editor');
+ printed=elements.get('#app').innerHTML;assert(printed.includes('水電工程報價單'));assert(printed.includes('6,300'));assert(printed.includes('設計及監工費用5%'));
+ assert(!printed.includes('成本價'));assert(!printed.includes('毛利'));
+ ctx.togglePrintFee();printed=elements.get('#app').innerHTML;assert(printed.includes('6,000'));assert(!printed.includes('設計及監工費用5%'));assert(printed.includes('不加收設計監工費'));
+ ctx.returnQuotePreview();assert.equal(ctx.S.view,'editor');assert.equal(ctx.S.lines[0].price,2000);assert.equal(ctx.S.editorNote,'保留未儲存說明');
+ ctx.previewTrade();assert.equal(ctx.S.printWithFee,false);ctx.togglePrintFee();assert.equal(ctx.S.printWithFee,true);
+ ctx.returnQuotePreview();ctx.api=previewApi;
  const realApi=ctx.api;ctx.api=async function(fn,...args){if(fn==='saveQuote')throw Error('network');return realApi(fn,...args)};
  ctx.saveQ();await settle();await settle();assert.equal(ctx.S.view,'editor');assert.equal(ctx.S.savingQuote,false);assert.equal(elements.get('#saveQuoteBtn').disabled,false);
- console.log('PASS: script syntax, trade isolation, same-name pricing, merge latest other trades, duplicate-save guard, conflict prevention, validation, single/all/custom/zero-price printing, retry after failure');
+ console.log('PASS: trade isolation, latest merge, pricing, conflict/duplicate guards, validation, single/all/custom printing, unsaved preview without API calls, 5% fee toggle and totals, preserved draft/note, retry after failure');
 })().catch(e=>{console.error(e);process.exitCode=1});
