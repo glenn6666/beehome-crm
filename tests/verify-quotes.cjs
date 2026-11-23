@@ -61,8 +61,8 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
  assert(detail.includes('公共區域保護工程'));assert(detail.includes('室內保護工程'));assert(detail.indexOf('公共區域地坪保護')<detail.indexOf('室內保護工程'));assert(!detail.includes('成本'));assert(detail.includes('防潮布、4mm夾板'));assert.equal(JSON.stringify(protection),original);
  // Spreadsheet account settings may arrive as a number, not text. Both saved
  // and unsaved previews must render without calling string methods on numbers.
- ctx.D.settings['匯款帳戶']=1234567890;ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：1234567890'));
- ctx.D.settings['匯款帳戶']='001234567890';ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：001234567890'));
+ ctx.D.settings['匯款帳戶']=1234567890;ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：中國信託銀行（822）帳號：1234567890'));
+ ctx.D.settings['匯款帳戶']='001234567890';ctx.vPrint();assert(elements.get('#app').innerHTML.includes('交易匯款帳戶：中國信託銀行（822）帳號：001234567890'));
  ctx.D.settings['匯款帳戶']='請自行填寫';ctx.vPrint();assert(!elements.get('#app').innerHTML.includes('交易匯款帳戶：'));
  ctx.D.settings['匯款帳戶']=null;ctx.vPrint();assert(!elements.get('#app').innerHTML.includes('交易匯款帳戶：'));
  ctx.D.settings['匯款帳戶']=1234567890;

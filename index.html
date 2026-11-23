@@ -1103,7 +1103,7 @@ function vPrint(){
   (S.printTrade?'':'<h3>工程預算彙總</h3><table class="quote-detail"><thead><tr><th>項次</th><th>工程類別</th><th>金額</th></tr></thead><tbody>'+cats.map(function(x,i){return '<tr><td class="center">'+(i+1)+'</td><td>'+esc(x)+'</td><td class="num">'+money(r.byCat[x])+'</td></tr>'}).join('')+'</tbody></table>')+
   '<table class="quote-totals"><tr><th>工程金額合計</th><td class="num">NT$ '+money(r.subtotal)+'</td></tr>'+(rate?'<tr><th>設計監工費 '+bhRound(rate*100,2)+'%</th><td class="num">NT$ '+money(r.fee)+'</td></tr>':'<tr><th>設計監工費</th><td class="num">不加收設計監工費</td></tr>')+'<tr class="grand"><th>工程總計（未稅）</th><td class="num">NT$ '+money(r.total)+'</td></tr></table>'+
   '<section class="quote-terms"><h3>報價說明與付款約定</h3>'+
-  (bankAccount&&bankAccount.indexOf('請自行')<0?'<p>交易匯款帳戶：'+esc(bankAccount)+'</p>':'')+
+  (bankAccount&&bankAccount.indexOf('請自行')<0?'<p>交易匯款帳戶：中國信託銀行（822）帳號：'+esc(bankAccount)+'</p>':'')+
   '<ol><li>以上報價含施工運費，未含營業稅；含稅另計，未列項目及追加工程另行計價。</li><li>本報價單經雙方同意簽約後，依下列期別付款。</li><li>貨款未付清前屬'+company+'所有。</li><li>簽約生效後，工程限於六個月內執行；有效期後開工須重新報價。</li></ol>'+
   '<div class="quote-payments">'+pay.map(function(p){return '<div>'+esc(p.name)+' '+p.pct+'%<b>NT$ '+money(p.amount)+'</b></div>'}).join('')+'</div><div>報價有效期限：'+(validUntil?esc(validUntil)+'（報價日起一個月）':'請確認報價日期')+'</div></section>'+
   '<div class="quote-signatures"><div>業主簽認：<br><br>日期：</div><div>工程承攬：'+company+'<br>承辦人：'+contact+'<br>日期：</div></div><div class="quote-foot">'+company+'　｜　室內裝修工程報價</div>'+
